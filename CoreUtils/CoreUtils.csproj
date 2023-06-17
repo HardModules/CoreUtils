@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>11</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <TargetFrameworks>net6.0;net7.0;netstandard2.0</TargetFrameworks>
+        <AssemblyName>HardDev.CoreUtils</AssemblyName>
+        <PackageId>HardDev.CoreUtils</PackageId>
+        <RootNamespace>HardDev.CoreUtils</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Company>HardDev</Company>
+        <Authors>CriDos</Authors>
+        <Product>CoreUtils</Product>
+
+        <Title>HardDev Core Utilities Library</Title>
+        <Description>A utility library providing core functionality such as advanced configuration handling, logging, and more for .NET applications.</Description>
+        <RepositoryUrl>https://github.com/HardModules/CoreUtils.git</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>configuration logging utility core-utils</PackageTags>
+        <PackageReleaseNotes>Initial release of the CoreUtils library</PackageReleaseNotes>
+
+        <AssemblyVersion>1.0</AssemblyVersion>
+        <FileVersion>1.0</FileVersion>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="docs\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Serilog" Version="2.12.0"/>
+        <PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.2"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
+        <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
+    </ItemGroup>
+
+</Project>
