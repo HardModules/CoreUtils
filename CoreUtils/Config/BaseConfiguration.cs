@@ -22,13 +22,12 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     private readonly ILogger _logger = AppLogger.ForName(typeof(T).Name);
 
     /// <summary>
-    /// Initializes a new instance of the BaseConfiguration class by loading the configuration from the specified path.
+    /// Initializes a new instance of the BaseConfiguration class.
     /// </summary>
     /// <param name="configPath">The path to the configuration file.</param>
     protected BaseConfiguration(string configPath)
     {
         ConfigPath = configPath;
-        Load();
     }
 
     /// <summary>
@@ -50,14 +49,16 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
                 {
                     try
                     {
+                        ClearCollections();
+
                         using var stringReader = new StringReader(json);
                         using var jsonReader = new JsonTextReader(stringReader);
 
-                        ClearCollections();
                         var serializer = new JsonSerializer();
                         serializer.Populate(jsonReader, this);
                         jsonReader.Close();
                         stringReader.Close();
+
                         loaded = true;
                     }
                     catch (JsonException)

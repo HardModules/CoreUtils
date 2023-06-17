@@ -17,7 +17,12 @@ public static class AppConfig
     public static T Get<T>() where T : BaseConfiguration<T>, new()
     {
         var configType = typeof(T).Name;
-        var config = Configurations.GetOrAdd(configType, _ => new T());
+        var config = Configurations.GetOrAdd(configType, _ =>
+        {
+            var config = new T();
+            config.Load();
+            return config;
+        });
         return (T)config;
     }
 

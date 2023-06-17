@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using HardDev.CoreUtils.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -11,21 +12,22 @@ public class AppConfigTests : IDisposable
     private const string CONFIG_FILE_NAME = "test_config.json";
     private const string ANOTHER_TEST_CONFIG = "another_test_config.json";
 
-    private class TestConfiguration : BaseConfiguration<TestConfiguration>
+    [DataContract]
+    public class TestConfiguration : BaseConfiguration<TestConfiguration>
     {
-        [DefaultValue("default string")]
+        [DataMember, DefaultValue("default string")]
         public string TestString { get; set; }
 
-        [DefaultValue(42)]
+        [DataMember, DefaultValue(42)]
         public int TestInt { get; set; }
 
-        [CollectionDefaultValue(typeof(List<string>), "item1", "item2")]
+        [DataMember, CollectionDefaultValue(typeof(List<string>), "item1", "item2")]
         public List<string> TestList { get; set; }
 
-        [CollectionDefaultValue(typeof(Dictionary<string, int>), "key1", 1, "key2", 2)]
+        [DataMember, CollectionDefaultValue(typeof(Dictionary<string, int>), "key1", 1, "key2", 2)]
         public Dictionary<string, int> TestDictionary { get; set; }
 
-        [CollectionDefaultValue(typeof(int[]), 1, 2, 3)]
+        [DataMember, CollectionDefaultValue(typeof(int[]), 1, 2, 3)]
         public int[] TestArray { get; set; }
 
         public TestConfiguration() : base(CONFIG_FILE_NAME)
@@ -33,12 +35,13 @@ public class AppConfigTests : IDisposable
         }
     }
 
-    private class AnotherTestConfiguration : BaseConfiguration<AnotherTestConfiguration>
+    [DataContract]
+    public class AnotherTestConfiguration : BaseConfiguration<AnotherTestConfiguration>
     {
-        [DefaultValue("second config")]
+        [DataMember, DefaultValue("second config")]
         public string AnotherTestString { get; set; }
 
-        [DefaultValue(24)]
+        [DataMember, DefaultValue(24)]
         public int AnotherTestInt { get; set; }
 
         public AnotherTestConfiguration() : base(ANOTHER_TEST_CONFIG)
@@ -232,8 +235,6 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void ClearConfiguration_RemovesAllCachedConfigurations()
     {
-        Cleanup();
-
         var firstConfig = AppConfig.Get<TestConfiguration>();
 
         firstConfig.TestString = "new value";

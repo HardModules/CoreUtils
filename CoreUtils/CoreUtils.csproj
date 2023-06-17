@@ -9,6 +9,9 @@
         <AssemblyName>HardDev.CoreUtils</AssemblyName>
         <PackageId>HardDev.CoreUtils</PackageId>
         <RootNamespace>HardDev.CoreUtils</RootNamespace>
+        <Version>1.0.1</Version>
+        <AssemblyVersion>1.0.1</AssemblyVersion>
+        <FileVersion>1.0.1</FileVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -22,9 +25,6 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageTags>configuration logging utility core-utils</PackageTags>
         <PackageReleaseNotes>Initial release of the CoreUtils library</PackageReleaseNotes>
-
-        <AssemblyVersion>1.0</AssemblyVersion>
-        <FileVersion>1.0</FileVersion>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
@@ -39,6 +39,7 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0"/>
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
+        <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0"/>
     </ItemGroup>
 
 </Project>
