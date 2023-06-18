@@ -132,7 +132,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     }
 
     /// <summary>
-    /// Resets all configuration data to default values and saves the changes asynchronously.
+    /// Resets all configuration data to default values and saves the changes.
     /// </summary>
     public void Reset()
     {
