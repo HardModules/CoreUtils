@@ -145,14 +145,6 @@ var scopedLogger = AppLogger.ForName("ScopedContext");
 scopedLogger.Information("This message has a custom context.");
 ```
 
-## Build
-
-HardDev.CoreUtils supports the following target frameworks:
-
-- .NET Standard 2.0
-- .NET 6.0
-- .NET 7.0
-
 ## License
 
 This project is licensed under the [MIT License](https://github.com/HardDev/CoreUtils/blob/main/LICENSE).
