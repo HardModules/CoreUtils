@@ -53,9 +53,15 @@ public class AppConfigTests : IDisposable
     public void Cleanup()
     {
         AppConfig.Clear();
+
         if (File.Exists(CONFIG_FILE_NAME))
         {
             File.Delete(CONFIG_FILE_NAME);
+        }
+
+        if (File.Exists(ANOTHER_TEST_CONFIG))
+        {
+            File.Delete(ANOTHER_TEST_CONFIG);
         }
     }
 
