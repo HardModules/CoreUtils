@@ -84,7 +84,7 @@ Logger.Information("ExampleDictionary: {ExampleDictionary}", string.Join(", ", s
 Logger.Information("Changing some values in SampleConfig...");
 sampleConfig.IntegerValue = 24;
 
-// Save the configuration asynchronously
+// Save the configuration
 Logger.Information("Saving SampleConfig...");
 sampleConfig.Save();
 ```

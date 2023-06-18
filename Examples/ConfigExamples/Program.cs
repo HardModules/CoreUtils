@@ -33,7 +33,7 @@ public static class Program
         sampleConfig.IntegerValue = 24;
         sampleConfig.DoubleValue = 6.28;
 
-        // Save the configuration asynchronously
+        // Save the configuration
         Logger.Information("Saving SampleConfig...");
         sampleConfig.Save();
 
