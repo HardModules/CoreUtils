@@ -11,7 +11,7 @@ cleaner and more efficient code.
 - Advanced configuration handling with support for JSON files and built-in default values and validation.
 - Easy-to-use logging setup built on top of the Serilog library.
 - Highly customizable logger configuration with adjustable log levels, output format, and more.
-- Supports .NET 6.0 and .NET 7.0 target frameworks
+- Supports .NET Standard 2.0, .NET 6.0 and .NET 7.0 target frameworks
 
 ## Getting Started
 
@@ -145,14 +145,6 @@ var scopedLogger = AppLogger.ForName("ScopedContext");
 scopedLogger.Information("This message has a custom context.");
 ```
 
-## Build
-
-HardDev.CoreUtils supports the following target frameworks:
-
-- .NET Standard 2.0
-- .NET 6.0
-- .NET 7.0
-
 ## License
 
-This project is licensed under the [MIT License](https://github.com/HardDev/CoreUtils/blob/main/LICENSE).
+This project is licensed under the [MIT License](https://github.com/HardModules/CoreUtils/blob/main/LICENSE).
