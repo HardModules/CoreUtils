@@ -147,4 +147,4 @@ scopedLogger.Information("This message has a custom context.");
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/HardDev/CoreUtils/blob/main/LICENSE).
+This project is licensed under the [MIT License](https://github.com/HardModules/CoreUtils/blob/main/LICENSE).
