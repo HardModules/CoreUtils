@@ -2,7 +2,7 @@
 using HardDev.CoreUtils.Logging;
 using Serilog;
 
-namespace ConfigExamples;
+namespace HardDev.ConfigExamples;
 
 public static class Program
 {

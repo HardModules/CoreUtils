@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using HardDev.CoreUtils.Config;
 
-namespace ConfigExamples;
+namespace HardDev.ConfigExamples;
 
 /// <summary>
 /// A sample configuration to show how to derive from BaseConfiguration and use default values and validations.

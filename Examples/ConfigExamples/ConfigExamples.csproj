@@ -6,10 +6,12 @@
         <Nullable>disable</Nullable>
         <LangVersion>11</LangVersion>
         <TargetFrameworks>net48;net6.0;net7.0</TargetFrameworks>
+        <AssemblyName>HardDev.ConfigExamples</AssemblyName>
+        <RootNamespace>HardDev.ConfigExamples</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\CoreUtils\CoreUtils.csproj"/>
+        <ProjectReference Include="..\..\CoreUtils\CoreUtils.csproj" />
     </ItemGroup>
 
 </Project>

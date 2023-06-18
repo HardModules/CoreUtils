@@ -2,7 +2,7 @@
 using Serilog;
 using Serilog.Events;
 
-namespace LoggingExamples
+namespace HardDev.LoggingExamples
 {
     public static class Program
     {

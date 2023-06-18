@@ -5,10 +5,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>11</LangVersion>
         <TargetFrameworks>net48;net6.0;net7.0</TargetFrameworks>
+        <AssemblyName>HardDev.LoggingExamples</AssemblyName>
+        <RootNamespace>HardDev.LoggingExamples</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\CoreUtils\CoreUtils.csproj"/>
+        <ProjectReference Include="..\..\CoreUtils\CoreUtils.csproj" />
     </ItemGroup>
 
 </Project>
