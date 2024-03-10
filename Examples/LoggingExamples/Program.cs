@@ -7,13 +7,16 @@ namespace HardDev.LoggingExamples
     public static class Program
     {
         // A default logger configuration, useful for most cases
-        private static readonly ILogger DefaultLogger = AppLogger.Log;
+        private static readonly ILogger DefaultLogger = AppLogger.ForName(nameof(Program));
 
         // A custom logger tailored to specific needs
         private static readonly ILogger CustomLogger = CreateCustomLogger();
 
         public static async Task Main()
         {
+            // Register global event handlers for logging
+            AppLogger.RegisterGlobalEventHandlers();
+            
             // Examples of logging messages at various levels using the default logger
             DefaultLogger.Verbose("This is a verbose log message");
             DefaultLogger.Debug("This is a debug log message");
@@ -47,6 +50,7 @@ namespace HardDev.LoggingExamples
                 EnableConsoleLogging = true,
                 EnableFileLogging = true,
                 ConsoleLogLevel = LogEventLevel.Information,
+                DebugLogLevel = LogEventLevel.Verbose,
                 FileLogLevel = LogEventLevel.Warning
             };
 

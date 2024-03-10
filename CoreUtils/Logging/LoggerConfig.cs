@@ -28,12 +28,18 @@ public class LoggerConfig
     /// <summary>
     /// Gets or sets the output template for the log messages.
     /// </summary>
-    public string OutputTemplate { get; set; } = "{Timestamp:HH:mm:ss}|{Level:u1}|{Context}|{categoryName} {Message:lj}{NewLine}{Exception}";
+    public string OutputTemplate { get; set; } =
+        "{Timestamp:HH:mm:ss}|{Level:u1}|{Context}|{categoryName} {Message:lj}{NewLine}{Exception}";
 
     /// <summary>
     /// Gets or sets a value indicating whether console logging is enabled.
     /// </summary>
     public bool EnableConsoleLogging { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether debug logging is enabled.
+    /// </summary>
+    public bool EnableDebugLogging { get; set; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether file logging is enabled.
@@ -50,6 +56,11 @@ public class LoggerConfig
     /// </summary>
     public LogEventLevel ConsoleLogLevel { get; set; } = LogEventLevel.Verbose;
 
+    /// <summary>
+    /// Gets or sets the minimum log event level for debug logging.
+    /// </summary>
+    public LogEventLevel DebugLogLevel { get; set; } = LogEventLevel.Verbose;
+    
     /// <summary>
     /// Gets or sets the minimum log event level for file logging.
     /// </summary>
