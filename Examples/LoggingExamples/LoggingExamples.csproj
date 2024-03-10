@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <LangVersion>11</LangVersion>
-        <TargetFrameworks>net48;net6.0;net7.0</TargetFrameworks>
         <AssemblyName>HardDev.LoggingExamples</AssemblyName>
         <RootNamespace>HardDev.LoggingExamples</RootNamespace>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <OutputType>Exe</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>

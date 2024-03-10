@@ -1,3 +1,4 @@
+using System.Globalization;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -10,18 +11,15 @@ namespace HardDev.CoreUtils.Logging;
 public static class AppLogger
 {
     private static readonly LoggingLevelSwitch ConsoleLevelSwitch = new();
+    private static readonly LoggingLevelSwitch DebugLevelSwitch = new();
     private static readonly LoggingLevelSwitch FileLevelSwitch = new();
+
     private static readonly object DirectoryCreationLock = new();
 
     /// <summary>
     /// Gets or sets the currently configured logger instance.
     /// </summary>
     public static ILogger Log { get; private set; } = Configure();
-
-    static AppLogger()
-    {
-        RegisterGlobalEventHandlers();
-    }
 
     /// <summary>
     /// Configures and applies the given logger configuration or creates a new default one if not provided.
@@ -46,6 +44,7 @@ public static class AppLogger
         }
 
         ConsoleLevelSwitch.MinimumLevel = loggerConfig.ConsoleLogLevel;
+        DebugLevelSwitch.MinimumLevel = loggerConfig.DebugLogLevel;
         FileLevelSwitch.MinimumLevel = loggerConfig.FileLogLevel;
 
         var configuration = new LoggerConfiguration()
@@ -54,23 +53,30 @@ public static class AppLogger
 
         if (loggerConfig.EnableFileLogging)
         {
-            configuration = configuration
+            configuration
                 .WriteTo.File(Path.Combine(loggerConfig.LogDirectory, loggerConfig.LogFileName),
                     outputTemplate: loggerConfig.OutputTemplate,
                     rollingInterval: loggerConfig.RollingInterval,
-                    levelSwitch: FileLevelSwitch);
+                    levelSwitch: FileLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
         if (loggerConfig.EnableConsoleLogging)
         {
-            configuration = configuration
+            configuration
                 .WriteTo.Console(outputTemplate: loggerConfig.OutputTemplate,
-                    levelSwitch: ConsoleLevelSwitch);
+                    levelSwitch: ConsoleLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
+        }
+
+        if (loggerConfig.EnableDebugLogging)
+        {
+            configuration
+                .WriteTo.Debug(outputTemplate: loggerConfig.OutputTemplate,
+                    levelSwitch: DebugLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
         foreach (var sinkConfig in loggerConfig.AdditionalSinks)
         {
-            configuration = configuration.WriteTo.Sink(sinkConfig);
+            configuration.WriteTo.Sink(sinkConfig);
         }
 
         Log = configuration
@@ -86,6 +92,13 @@ public static class AppLogger
     /// <param name="consoleLevel">The log event level for the console logger.</param>
     public static void SetConsoleMinLevel(LogEventLevel consoleLevel) =>
         ConsoleLevelSwitch.MinimumLevel = consoleLevel;
+
+    /// <summary>
+    /// Sets the minimum debug logging level.
+    /// </summary>
+    /// <param name="consoleLevel">The log event level for the console logger.</param>
+    public static void SetDebugMinLevel(LogEventLevel consoleLevel) =>
+        DebugLevelSwitch.MinimumLevel = consoleLevel;
 
     /// <summary>
     /// Sets the minimum file logging level.
@@ -105,12 +118,31 @@ public static class AppLogger
     }
 
     /// <summary>
+    /// Creates a logger instance with the context name corresponding to the name of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">The type whose name will be used as the context name for the logger.</typeparam>
+    /// <returns>A new logger instance with the context name corresponding to the name of type <typeparamref name="T"/>.</returns>
+    public static ILogger For<T>()
+    {
+        return Log.ForContext("Context", nameof(T));
+    }
+
+    /// <summary>
     /// Registers handlers for global events such as unhandled exceptions and unobserved task exceptions.
     /// </summary>
-    private static void RegisterGlobalEventHandlers()
+    public static void RegisterGlobalEventHandlers()
     {
         AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+    }
+
+    /// <summary>
+    /// Unregisters handlers for global events such as unhandled exceptions and unobserved task exceptions.
+    /// </summary>
+    public static void UnregisterGlobalEventHandlers()
+    {
+        AppDomain.CurrentDomain.UnhandledException -= OnUnhandledException;
+        TaskScheduler.UnobservedTaskException -= OnUnobservedTaskException;
     }
 
     private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
@@ -121,6 +153,5 @@ public static class AppLogger
     private static void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs args)
     {
         Log.Fatal(args.Exception, "Unobserved task exception");
-        args.SetObserved();
     }
 }
