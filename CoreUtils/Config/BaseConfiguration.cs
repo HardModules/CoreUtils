@@ -192,24 +192,23 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
                 var results = new List<ValidationResult>();
 
                 var isValid = Validator.TryValidateProperty(prop.GetValue(this), validationContext, results);
-
-                if (!isValid)
+                if (isValid)
+                    continue;
+                
+                _logger.Warning("Validation error for the property value '{PropName}':", prop.Name);
+                foreach (var validationResult in results)
                 {
-                    _logger.Warning("Validation error for the property value '{PropName}':", prop.Name);
-                    foreach (var validationResult in results)
-                    {
-                        _logger.Warning("  - {ErrorMessage}", validationResult.ErrorMessage);
-                    }
-
-                    var defaultValueAttr = prop.GetCustomAttributes(typeof(DefaultValueAttribute), true).OfType<DefaultValueAttribute>()
-                        .FirstOrDefault();
-
-                    if (defaultValueAttr != null)
-                    {
-                        prop.SetValue(this, defaultValueAttr.Value);
-                        needSave = true;
-                    }
+                    _logger.Warning("  - {ErrorMessage}", validationResult.ErrorMessage);
                 }
+
+                var defaultValueAttr = prop.GetCustomAttributes(typeof(DefaultValueAttribute), true).OfType<DefaultValueAttribute>()
+                    .FirstOrDefault();
+
+                if (defaultValueAttr == null)
+                    continue;
+                
+                prop.SetValue(this, defaultValueAttr.Value);
+                needSave = true;
             }
             catch (Exception ex)
             {
