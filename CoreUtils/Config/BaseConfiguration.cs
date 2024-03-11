@@ -19,7 +19,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     public string ConfigPath { get; }
 
     private readonly ILogger _logger = AppLogger.ForName(typeof(T).Name);
-    private readonly SemaphoreSlim _fileLock = new(1);
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.
@@ -35,8 +34,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// </summary>
     public void Load()
     {
-        _fileLock.Wait();
-
         try
         {
             if (File.Exists(ConfigPath))
@@ -73,10 +70,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         {
             _logger.Error(ex, "Error occurred while loading the configuration");
         }
-        finally
-        {
-            _fileLock.Release();
-        }
     }
 
     /// <summary>
@@ -84,8 +77,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// </summary>
     public void Save()
     {
-        _fileLock.Wait();
-
         try
         {
             var directoryPath = Path.GetDirectoryName(ConfigPath);
@@ -100,10 +91,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while saving the configuration");
-        }
-        finally
-        {
-            _fileLock.Release();
         }
     }
 
