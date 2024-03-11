@@ -11,7 +11,7 @@ cleaner and more efficient code.
 - Advanced configuration handling with support for JSON files and built-in default values and validation.
 - Easy-to-use logging setup built on top of the Serilog library.
 - Highly customizable logger configuration with adjustable log levels, output format, and more.
-- Supports .NET Standard 2.0, .NET 6.0 and .NET 7.0 target frameworks
+- Supports .NET Standard 2.0, .NET Standard 2.1 and .NET 8.0 target frameworks
 
 ## Getting Started
 
@@ -31,62 +31,121 @@ across your application.
 Creating a Configuration file:
 
 ```csharp
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using HardDev.CoreUtils.Config;
 
-[DataContract]
-public class SampleConfig : BaseConfiguration<SampleConfig>
+namespace HardDev.ConfigExamples;
+
+/// <summary>
+/// A sample configuration to show how to derive from BaseConfiguration and use default values and validations.
+/// </summary>
+public class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/SampleConfig.json")
 {
-    [DataMember, DefaultValue(42)]
-    public int IntegerValue { get; set; }
+    /// <summary>
+    /// Gets or sets an integer value.
+    /// </summary>
+    [Range(1, 100)]
+    public int IntegerValue { get; set; } = 42;
 
-    [DataMember, DefaultValue("http://default_url.com"), Url(ErrorMessage = "Invalid URL format")]
-    public string Url { get; set; } 
+    /// <summary>
+    /// Gets or sets a double value.
+    /// </summary>
+    public double DoubleValue { get; set; } = 3.14;
 
-    [DataMember, CollectionDefaultValue(typeof(string[]), "Acc1", "Acc2"), Required(ErrorMessage = "Accounts cannot be null"),
+    /// <summary>
+    /// Gets or sets a float value.
+    /// </summary>
+    public float FloatValue { get; set; } = 123.456f;
+
+    /// <summary>
+    /// Gets or sets a boolean value.
+    /// </summary>
+    public bool BooleanValue { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a URL as a string.
+    /// </summary>
+    [Url(ErrorMessage = "Invalid URL format")]
+    public string Url { get; set; } = "http://default_url.com";
+
+    /// <summary>
+    /// Gets or sets a read-only list of strings representing accounts.
+    /// </summary>
+    [Required(ErrorMessage = "Accounts cannot be null"),
      MinLength(1, ErrorMessage = "Accounts cannot be empty")]
-    public IReadOnlyList<string> Accounts { get; set; }
+    public IReadOnlyList<string> Accounts { get; set; } = new List<string> { "Account1", "Account2", "Account3" };
 
-    [DataMember, CollectionDefaultValue(typeof(List<int>), 1, 2, 3), Required(ErrorMessage = "Numbers cannot be null"),
+    /// <summary>
+    /// Gets or sets a read-only list of integers representing numbers.
+    /// </summary>
+    [Required(ErrorMessage = "Numbers cannot be null"),
      MinLength(1, ErrorMessage = "Numbers cannot be empty")]
-    public IReadOnlyList<int> Numbers { get; set; }
+    public IReadOnlyList<int> Numbers { get; set; } = new List<int> { 1, 2, 3 };
 
-    [DataMember, CollectionDefaultValue(typeof(Dictionary<string, int>), "Key1", 1, "Key2", 2),
-     Required(ErrorMessage = "Example dictionary cannot be null"), MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
-    public IDictionary<string, int> ExampleDictionary { get; set; }
-
-    public SampleConfig() : base("Configs/SampleConfig.json")
-    {
-    }
+    /// <summary>
+    /// Gets or sets a dictionary with string keys and integer values.
+    /// </summary>
+    [Required(ErrorMessage = "Example dictionary cannot be null"), MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
+    public IDictionary<string, int> ExampleDictionary { get; set; } = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 }
 ```
 
 Using a Configuration in your application:
 
 ``` csharp
-// Loads SampleConfig and demonstrates its configurations
-Logger.Information("Loading SampleConfig...");
+using HardDev.CoreUtils.Config;
+using HardDev.CoreUtils.Logging;
+using Serilog;
 
-// Get or create a SampleConfig instance
-var sampleConfig = AppConfig.Get<SampleConfig>();
+namespace HardDev.ConfigExamples;
 
-// Print the loaded values
-Logger.Information("Loaded values from SampleConfig:");
-Logger.Information("IntegerValue: {IntegerValue}", sampleConfig.IntegerValue);
-Logger.Information("Url: {Url}", sampleConfig.Url);
-Logger.Information("Accounts: {Accounts}", string.Join(", ", sampleConfig.Accounts));
-Logger.Information("Numbers: {Numbers}", string.Join(", ", sampleConfig.Numbers));
-Logger.Information("ExampleDictionary: {ExampleDictionary}", string.Join(", ", sampleConfig.ExampleDictionary));
+public static class Program
+{
+    // Configure the logger for the example class
+    private static readonly ILogger Logger = AppLogger.Configure(new LoggerConfig { EnableFileLogging = false });
 
-// Change some values
-Logger.Information("Changing some values in SampleConfig...");
-sampleConfig.IntegerValue = 24;
+    public static void Main()
+    {
+        // Loads SampleConfig and demonstrates its configurations
+        Logger.Information("Loading SampleConfig...");
 
-// Save the configuration
-Logger.Information("Saving SampleConfig...");
-sampleConfig.Save();
+        // Get or create a SampleConfig instance
+        var sampleConfig = AppConfig.Get<SampleConfig>();
+
+        // Print the loaded values
+        Logger.Information("Loaded values from SampleConfig:");
+        Logger.Information("IntegerValue: {IntegerValue}", sampleConfig.IntegerValue);
+        Logger.Information("DoubleValue: {DoubleValue}", sampleConfig.DoubleValue);
+        Logger.Information("FloatValue: {FloatValue}", sampleConfig.FloatValue);
+        Logger.Information("BooleanValue: {BooleanValue}", sampleConfig.BooleanValue);
+        Logger.Information("Url: {Url}", sampleConfig.Url);
+        Logger.Information("Accounts: {Accounts}", string.Join(", ", sampleConfig.Accounts));
+        Logger.Information("Numbers: {Numbers}", string.Join(", ", sampleConfig.Numbers));
+        Logger.Information("ExampleDictionary: {ExampleDictionary}", string.Join(", ", sampleConfig.ExampleDictionary));
+
+        // Change some values
+        Logger.Information("Changing some values in SampleConfig...");
+        sampleConfig.IntegerValue = 999;
+        sampleConfig.DoubleValue = 6.28;
+
+        // Validate the configuration 
+        Logger.Information("Validating SampleConfig...");
+        sampleConfig.EnsureValidProperties();
+        
+        // Print the changed values
+        Logger.Information("Changed values in SampleConfig:");
+        Logger.Information("IntegerValue: {IntegerValue}", sampleConfig.IntegerValue);
+        Logger.Information("DoubleValue: {DoubleValue}", sampleConfig.DoubleValue);
+
+        // Save the configuration
+        Logger.Information("Saving SampleConfig...");
+        sampleConfig.Save();
+
+        // Wait for user input to close the console window
+        Logger.Information("Press any key to exit...");
+        Console.ReadKey();
+    }
+}
 ```
 
 ### Logging
@@ -109,10 +168,10 @@ var loggerConfig = new AppLoggerConfig
     ConsoleLogLevel = LogEventLevel.Debug,
     FileLogLevel = LogEventLevel.Verbose,
 };
-AppLogger.Configure(loggerConfig);
+var logger = AppLogger.Configure(loggerConfig);
 
 // Log a message
-AppLogger.Log.Information("Hello, World!");
+logger.Information("Hello, World!");
 ```
 
 More examples of using the logger:
@@ -144,6 +203,7 @@ AppLogger.Log.Warning("Current users reached {CurrentUsers} out of {MaxUsers}", 
 var scopedLogger = AppLogger.ForName("ScopedContext");
 scopedLogger.Information("This message has a custom context.");
 ```
+
 
 ## License
 

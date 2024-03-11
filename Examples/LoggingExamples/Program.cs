@@ -48,6 +48,7 @@ namespace HardDev.LoggingExamples
                 LogFileName = "custom_log_.txt",
                 OutputTemplate = "{Timestamp:HH:mm:ss}|{Level:u1}|{Context}|CUSTOM {Message:lj}{NewLine}{Exception}",
                 EnableConsoleLogging = true,
+                EnableDebugLogging = true,
                 EnableFileLogging = true,
                 ConsoleLogLevel = LogEventLevel.Information,
                 DebugLogLevel = LogEventLevel.Verbose,
