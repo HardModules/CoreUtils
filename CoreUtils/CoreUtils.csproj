@@ -4,9 +4,9 @@
         <AssemblyName>HardDev.CoreUtils</AssemblyName>
         <PackageId>HardDev.CoreUtils</PackageId>
         <RootNamespace>HardDev.CoreUtils</RootNamespace>
-        <Version>1.2.2</Version>
-        <AssemblyVersion>1.2.2</AssemblyVersion>
-        <FileVersion>1.2.2</FileVersion>
+        <Version>1.2.1</Version>
+        <AssemblyVersion>1.2.1</AssemblyVersion>
+        <FileVersion>1.2.1</FileVersion>
         <TargetFrameworks>net8.0;netstandard2.0;netstandard2.1</TargetFrameworks>
         <LangVersion>12</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
