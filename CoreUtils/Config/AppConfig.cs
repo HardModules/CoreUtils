@@ -10,29 +10,63 @@ public static class AppConfig
     private static readonly ConcurrentDictionary<string, IConfiguration> Configurations = new();
 
     /// <summary>
-    /// Gets the instance of the requested configuration type. If an instance does not exist, creates a new one.
+    /// Gets the instance of the requested configuration type.
+    /// If an instance does not exist, creates a new one.
     /// </summary>
     /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
     /// <returns>An instance of the requested configuration type.</returns>
     public static T Get<T>() where T : BaseConfiguration<T>, new()
     {
-        var configType = typeof(T).Name;
-        var config = Configurations.GetOrAdd(configType, _ =>
-        {
-            var config = new T();
-            config.Load();
-            return config;
-        });
-        return (T)config;
+        return Configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
+    }
+
+    /// <summary>
+    /// Determines if a configuration of the requested type exists.
+    /// </summary>
+    /// <typeparam name="T">The type of configuration to check.</typeparam>
+    /// <returns>True if the configuration exists, false otherwise.</returns>
+    public static bool Contains<T>() where T : BaseConfiguration<T>, new()
+    {
+        return Configurations.ContainsKey(typeof(T).Name);
+    }
+
+    /// <summary>
+    /// Removes a configuration of the requested type.
+    /// </summary>
+    /// <typeparam name="T">The type of configuration to remove.</typeparam>
+    /// <returns>True if the configuration was removed, false otherwise.</returns>
+    public static bool Remove<T>() where T : BaseConfiguration<T>, new()
+    {
+        return Configurations.TryRemove(typeof(T).Name, out _);
     }
 
     /// <summary>
     /// Clears all the configuration instances managed by the AppConfig.
-    /// This may be useful in scenarios where a complete reset of the application state is required,
-    /// such as during testing or after a significant change in the application environment.
     /// </summary>
     public static void Clear()
     {
         Configurations.Clear();
+    }
+
+    /// <summary>
+    /// Loads all the configuration instances managed by the AppConfig.
+    /// </summary>
+    public static void Load()
+    {
+        foreach (var config in Configurations.Values)
+        {
+            config.Load();
+        }
+    }
+
+    /// <summary>
+    /// Saves all the configuration instances managed by the AppConfig.
+    /// </summary>
+    public static void Save()
+    {
+        foreach (var config in Configurations.Values)
+        {
+            config.Save();
+        }
     }
 }
