@@ -141,6 +141,10 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         return changesMade;
     }
 
+    /// <summary>
+    /// Populates the properties of the target object with the values of the properties of the source object.
+    /// </summary>
+    /// <param name="target"></param>
     private void Populate(T target)
     {
         foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))

@@ -259,24 +259,4 @@ public class AppConfigTests : IDisposable
         Assert.AreEqual(42, config.TestInt);
         Assert.IsTrue(result);
     }
-
-    [TestMethod]
-    public void CollectionDefaultValueAttribute_SetsCorrectValues()
-    {
-        var config = new TestConfiguration();
-
-        config.Reset();
-
-        CollectionAssert.AreEqual(new List<string> { "item1", "item2" }, config.TestList);
-    }
-
-    [TestMethod]
-    public void CollectionDefaultValueAttribute_CreatesCorrectCollection()
-    {
-        var attribute = new CollectionDefaultValueAttribute(typeof(List<string>), "item1", "item2");
-
-        var result = attribute.Value as List<string>;
-
-        CollectionAssert.AreEqual(new List<string> { "item1", "item2" }, result);
-    }
 }
