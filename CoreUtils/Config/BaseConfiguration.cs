@@ -36,8 +36,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     public void Load()
     {
         _fileLock.Wait();
-        var loaded = false;
-        var needSave = false;
 
         try
         {
@@ -50,20 +48,19 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
                     try
                     {
                         Populate(JsonSerializer.Deserialize<T>(content));
-                        loaded = true;
+                        EnsureValidProperties();
                     }
                     catch (JsonException)
                     {
-                        _logger.Warning("Configuration file contains invalid JSON. Using default values and updating the file");
+                        _logger.Warning(
+                            "Configuration file contains invalid JSON. Using default values and updating the file");
                         Reset();
-                        needSave = true;
                     }
                 }
                 else
                 {
                     _logger.Warning("Configuration file is empty. Using default values and updating the file");
                     Reset();
-                    needSave = true;
                 }
             }
             else
@@ -80,17 +77,6 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         {
             _fileLock.Release();
         }
-
-        if (loaded)
-        {
-            if (EnsureValidProperties())
-            {
-                needSave = true;
-            }
-        }
-
-        if (needSave)
-            Save();
     }
 
     /// <summary>
@@ -107,7 +93,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
             {
                 Directory.CreateDirectory(directoryPath);
             }
-            
+
             var json = JsonSerializer.Serialize(this as T);
             File.WriteAllText(ConfigPath, json);
         }
@@ -128,7 +114,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     {
         Populate(Activator.CreateInstance<T>());
     }
-  
+
     /// <summary>
     /// Validates and corrects the properties of the configuration object by setting default values for invalid properties.
     /// </summary>
