@@ -129,7 +129,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
                 }
 
                 prop.SetValue(this, prop.GetValue(defaultInstance));
-                _logger.Information("Set default value for property '{PropName}'", prop.Name);
+                _logger.Warning("Set default value for property '{PropName}'", prop.Name);
                 changesMade = true;
             }
             catch (Exception ex)
