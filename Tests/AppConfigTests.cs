@@ -15,8 +15,7 @@ public class AppConfigTests : IDisposable
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
         public string TestString { get; set; } = "default string";
-        [Range(1, 100)]
-        public int TestInt { get; set; } = 42;
+        [Range(1, 100)] public int TestInt { get; set; } = 42;
         public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
         public int[] TestArray { get; set; } = [1, 2, 3];
     }
@@ -33,14 +32,10 @@ public class AppConfigTests : IDisposable
         AppConfig.Clear();
 
         if (File.Exists(CONFIG_FILE_NAME))
-        {
             File.Delete(CONFIG_FILE_NAME);
-        }
 
         if (File.Exists(ANOTHER_TEST_CONFIG))
-        {
             File.Delete(ANOTHER_TEST_CONFIG);
-        }
     }
 
     public void Dispose()
@@ -122,7 +117,8 @@ public class AppConfigTests : IDisposable
         Assert.AreEqual("new string", newConfig.TestString);
         Assert.AreEqual(99, newConfig.TestInt);
         CollectionAssert.AreEqual(new List<string> { "item1", "item2", "item3" }, newConfig.TestList);
-        CollectionAssert.AreEqual(new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 }, { "key3", 3 } }, newConfig.TestDictionary);
+        CollectionAssert.AreEqual(new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 }, { "key3", 3 } },
+            newConfig.TestDictionary);
         CollectionAssert.AreEqual(new[] { 4, 5, 6 }, newConfig.TestArray);
     }
 
