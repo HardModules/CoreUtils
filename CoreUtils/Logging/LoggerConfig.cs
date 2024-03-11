@@ -51,6 +51,11 @@ public class LoggerConfig
     public RollingInterval RollingInterval { get; set; } = RollingInterval.Day;
 
     /// <summary>
+    /// Gets or sets the retained file count limit for log files.
+    /// </summary>
+    public int RetainedFileCountLimit { get; set; } = 31;
+    
+    /// <summary>
     /// Gets or sets the minimum log event level for console logging.
     /// </summary>
     public LogEventLevel ConsoleLogLevel { get; set; } = LogEventLevel.Verbose;

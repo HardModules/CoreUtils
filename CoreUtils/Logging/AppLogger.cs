@@ -57,6 +57,7 @@ public static class AppLogger
                 .WriteTo.File(Path.Combine(loggerConfig.LogDirectory, loggerConfig.LogFileName),
                     outputTemplate: loggerConfig.OutputTemplate,
                     rollingInterval: loggerConfig.RollingInterval,
+                    retainedFileCountLimit: loggerConfig.RetainedFileCountLimit,
                     levelSwitch: FileLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
