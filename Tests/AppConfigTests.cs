@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using System.Text.Json;
 using HardDev.CoreUtils.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,7 +15,7 @@ public class AppConfigTests : IDisposable
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
         public string TestString { get; set; } = "default string";
-        [DataMember, Range(1, 100)]
+        [Range(1, 100)]
         public int TestInt { get; set; } = 42;
         public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
         public int[] TestArray { get; set; } = [1, 2, 3];
