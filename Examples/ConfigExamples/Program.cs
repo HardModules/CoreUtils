@@ -6,7 +6,7 @@ namespace HardDev.ConfigExamples;
 
 public static class Program
 {
-    // Configure the logger for the demo class
+    // Configure the logger for the example class
     private static readonly ILogger Logger = AppLogger.Configure(new LoggerConfig { EnableFileLogging = false });
 
     public static void Main()
@@ -30,8 +30,17 @@ public static class Program
 
         // Change some values
         Logger.Information("Changing some values in SampleConfig...");
-        sampleConfig.IntegerValue = 24;
+        sampleConfig.IntegerValue = 999;
         sampleConfig.DoubleValue = 6.28;
+
+        // Validate the configuration 
+        Logger.Information("Validating SampleConfig...");
+        sampleConfig.EnsureValidProperties();
+        
+        // Print the changed values
+        Logger.Information("Changed values in SampleConfig:");
+        Logger.Information("IntegerValue: {IntegerValue}", sampleConfig.IntegerValue);
+        Logger.Information("DoubleValue: {DoubleValue}", sampleConfig.DoubleValue);
 
         // Save the configuration
         Logger.Information("Saving SampleConfig...");

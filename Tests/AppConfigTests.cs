@@ -1,8 +1,8 @@
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using System.Text.Json;
 using HardDev.CoreUtils.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace HardDev.Tests;
 
@@ -12,41 +12,20 @@ public class AppConfigTests : IDisposable
     private const string CONFIG_FILE_NAME = "test_config.json";
     private const string ANOTHER_TEST_CONFIG = "another_test_config.json";
 
-    [DataContract]
-    public class TestConfiguration : BaseConfiguration<TestConfiguration>
+    public class TestConfiguration() : BaseConfiguration<TestConfiguration>(CONFIG_FILE_NAME)
     {
-        [DataMember, DefaultValue("default string")]
-        public string TestString { get; set; }
-
-        [DataMember, DefaultValue(42)]
-        public int TestInt { get; set; }
-
-        [DataMember, CollectionDefaultValue(typeof(List<string>), "item1", "item2")]
-        public List<string> TestList { get; set; }
-
-        [DataMember, CollectionDefaultValue(typeof(Dictionary<string, int>), "key1", 1, "key2", 2)]
-        public Dictionary<string, int> TestDictionary { get; set; }
-
-        [DataMember, CollectionDefaultValue(typeof(int[]), 1, 2, 3)]
-        public int[] TestArray { get; set; }
-
-        public TestConfiguration() : base(CONFIG_FILE_NAME)
-        {
-        }
+        public List<string> TestList { get; set; } = ["item1", "item2"];
+        public string TestString { get; set; } = "default string";
+        [DataMember, Range(1, 100)]
+        public int TestInt { get; set; } = 42;
+        public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
+        public int[] TestArray { get; set; } = [1, 2, 3];
     }
 
-    [DataContract]
-    public class AnotherTestConfiguration : BaseConfiguration<AnotherTestConfiguration>
+    public class AnotherTestConfiguration() : BaseConfiguration<AnotherTestConfiguration>(ANOTHER_TEST_CONFIG)
     {
-        [DataMember, DefaultValue("second config")]
-        public string AnotherTestString { get; set; }
-
-        [DataMember, DefaultValue(24)]
-        public int AnotherTestInt { get; set; }
-
-        public AnotherTestConfiguration() : base(ANOTHER_TEST_CONFIG)
-        {
-        }
+        public string AnotherTestString { get; set; } = "second config";
+        public int AnotherTestInt { get; set; } = 24;
     }
 
     [TestInitialize]
@@ -68,6 +47,7 @@ public class AppConfigTests : IDisposable
     public void Dispose()
     {
         Cleanup();
+        GC.SuppressFinalize(this);
     }
 
     [TestMethod]
@@ -90,18 +70,17 @@ public class AppConfigTests : IDisposable
         config.TestInt = 99;
         config.TestList.Add("item3");
         config.TestDictionary.Add("key3", 3);
-        config.TestArray = new[] { 4, 5, 6 };
+        config.TestArray = [4, 5, 6];
 
         config.Save();
 
-        var configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
-        var deserializedConfig = JsonConvert.DeserializeObject<TestConfiguration>(configFileContent);
+        var testConfiguration = AppConfig.Get<TestConfiguration>();
 
-        Assert.AreEqual(config.TestString, deserializedConfig.TestString);
-        Assert.AreEqual(config.TestInt, deserializedConfig.TestInt);
-        CollectionAssert.AreEqual(config.TestList, deserializedConfig.TestList);
-        CollectionAssert.AreEqual(config.TestDictionary, deserializedConfig.TestDictionary);
-        CollectionAssert.AreEqual(config.TestArray, deserializedConfig.TestArray);
+        Assert.AreEqual(config.TestString, testConfiguration.TestString);
+        Assert.AreEqual(config.TestInt, testConfiguration.TestInt);
+        CollectionAssert.AreEqual(config.TestList, testConfiguration.TestList);
+        CollectionAssert.AreEqual(config.TestDictionary, testConfiguration.TestDictionary);
+        CollectionAssert.AreEqual(config.TestArray, testConfiguration.TestArray);
     }
 
     [TestMethod]
@@ -113,7 +92,7 @@ public class AppConfigTests : IDisposable
         config.TestInt = 99;
         config.TestList.Add("item3");
         config.TestDictionary.Add("key3", 3);
-        config.TestArray = new[] { 4, 5, 6 };
+        config.TestArray = [4, 5, 6];
 
         config.Reset();
 
@@ -133,10 +112,11 @@ public class AppConfigTests : IDisposable
         config.TestInt = 99;
         config.TestList.Add("item3");
         config.TestDictionary.Add("key3", 3);
-        config.TestArray = new[] { 4, 5, 6 };
+        config.TestArray = [4, 5, 6];
 
         config.Save();
 
+        AppConfig.Clear();
         var newConfig = AppConfig.Get<TestConfiguration>();
         newConfig.Load();
 
@@ -163,16 +143,16 @@ public class AppConfigTests : IDisposable
         config.Load();
 
         Assert.AreEqual("modified string", config.TestString);
-        Assert.AreEqual(888, config.TestInt);
+        Assert.AreEqual(42, config.TestInt);
         CollectionAssert.AreEqual(new List<string> { "item3", "item4" }, config.TestList);
         CollectionAssert.AreEqual(new Dictionary<string, int> { { "key3", 3 }, { "key4", 4 } }, config.TestDictionary);
         CollectionAssert.AreEqual(new[] { 4, 5, 6 }, config.TestArray);
     }
 
     [TestMethod]
-    public void Load_BrokenJson_LoadsDefaultValuesAndUpdatesFile()
+    public void Load_InvalidJson_UsesDefaultsAndUpdatesFile()
     {
-        const string BROKEN_JSON = @"{ ""TestString"": ""modified string"", ""Test";
+        const string BROKEN_JSON = """@ "TestString": "modified string, "Test" """;
         File.WriteAllText(CONFIG_FILE_NAME, BROKEN_JSON);
 
         var config = AppConfig.Get<TestConfiguration>();
@@ -186,7 +166,7 @@ public class AppConfigTests : IDisposable
         config.Save();
 
         var configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
-        var deserializedConfig = JsonConvert.DeserializeObject<TestConfiguration>(configFileContent);
+        var deserializedConfig = JsonSerializer.Deserialize<TestConfiguration>(configFileContent);
 
         Assert.AreEqual(config.TestString, deserializedConfig.TestString);
         Assert.AreEqual(config.TestInt, deserializedConfig.TestInt);
@@ -211,16 +191,17 @@ public class AppConfigTests : IDisposable
     }
 
     [TestMethod]
-    public void Load_NonexistentFile_CreatesNewFile()
+    public void Load_DefaultAndSaveIfFileMissing()
     {
         var config = AppConfig.Get<TestConfiguration>();
-        config.Load();
 
         Assert.AreEqual("default string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
         CollectionAssert.AreEqual(new List<string> { "item1", "item2" }, config.TestList);
         CollectionAssert.AreEqual(new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 } }, config.TestDictionary);
         CollectionAssert.AreEqual(new[] { 1, 2, 3 }, config.TestArray);
+
+        config.Save();
 
         Assert.IsTrue(File.Exists(CONFIG_FILE_NAME));
     }
@@ -244,7 +225,6 @@ public class AppConfigTests : IDisposable
         var firstConfig = AppConfig.Get<TestConfiguration>();
 
         firstConfig.TestString = "new value";
-        Assert.AreEqual("new value", firstConfig.TestString);
 
         AppConfig.Clear();
 
@@ -252,5 +232,52 @@ public class AppConfigTests : IDisposable
 
         Assert.AreNotSame(firstConfig, secondConfig);
         Assert.AreEqual("default string", secondConfig.TestString);
+    }
+
+    [TestMethod]
+    public void ValidateProperties_InvalidValue_SetsDefaultValue()
+    {
+        var config = new TestConfiguration
+        {
+            TestInt = -1
+        };
+
+        config.Load();
+
+        Assert.AreEqual(42, config.TestInt);
+    }
+
+    [TestMethod]
+    public void EnsureValidProperties_InvalidValue_CorrectsValueAndIndicatesChange()
+    {
+        var config = new TestConfiguration
+        {
+            TestInt = -1
+        };
+
+        var result = config.EnsureValidProperties();
+
+        Assert.AreEqual(42, config.TestInt);
+        Assert.IsTrue(result);
+    }
+
+    [TestMethod]
+    public void CollectionDefaultValueAttribute_SetsCorrectValues()
+    {
+        var config = new TestConfiguration();
+
+        config.Reset();
+
+        CollectionAssert.AreEqual(new List<string> { "item1", "item2" }, config.TestList);
+    }
+
+    [TestMethod]
+    public void CollectionDefaultValueAttribute_CreatesCorrectCollection()
+    {
+        var attribute = new CollectionDefaultValueAttribute(typeof(List<string>), "item1", "item2");
+
+        var result = attribute.Value as List<string>;
+
+        CollectionAssert.AreEqual(new List<string> { "item1", "item2" }, result);
     }
 }

@@ -16,7 +16,7 @@ public interface IConfiguration
     void Save();
 
     /// <summary>
-    /// Resets all configuration data to default values and saves the changes.
+    /// Resets all configuration data to default values.
     /// </summary>
     void Reset();
 }

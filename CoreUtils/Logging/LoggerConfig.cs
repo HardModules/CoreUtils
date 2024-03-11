@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using Serilog.Events;
-using Serilog.Configuration;
 using Serilog.Core;
 
 namespace HardDev.CoreUtils.Logging;

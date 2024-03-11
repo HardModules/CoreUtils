@@ -1,8 +1,7 @@
-using System.Collections;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using HardDev.CoreUtils.Logging;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace HardDev.CoreUtils.Config;
@@ -16,10 +15,11 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// <summary>
     /// Gets the path to the configuration file.
     /// </summary>
+    [JsonIgnore]
     public string ConfigPath { get; }
 
-    private readonly SemaphoreSlim _configLock = new(1);
     private readonly ILogger _logger = AppLogger.ForName(typeof(T).Name);
+    private readonly SemaphoreSlim _fileLock = new(1);
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.
@@ -35,7 +35,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// </summary>
     public void Load()
     {
-        _configLock.Wait();
+        _fileLock.Wait();
         var loaded = false;
         var needSave = false;
 
@@ -43,43 +43,33 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         {
             if (File.Exists(ConfigPath))
             {
-                var json = File.ReadAllText(ConfigPath);
+                var content = File.ReadAllText(ConfigPath);
 
-                if (!string.IsNullOrEmpty(json))
+                if (!string.IsNullOrEmpty(content))
                 {
                     try
                     {
-                        ClearCollections();
-
-                        using var stringReader = new StringReader(json);
-                        using var jsonReader = new JsonTextReader(stringReader);
-
-                        var serializer = new JsonSerializer();
-                        serializer.Populate(jsonReader, this);
-                        jsonReader.Close();
-                        stringReader.Close();
-
+                        Populate(JsonSerializer.Deserialize<T>(content));
                         loaded = true;
                     }
                     catch (JsonException)
                     {
                         _logger.Warning("Configuration file contains invalid JSON. Using default values and updating the file");
-                        SetDefaultValues();
+                        Reset();
                         needSave = true;
                     }
                 }
                 else
                 {
                     _logger.Warning("Configuration file is empty. Using default values and updating the file");
-                    SetDefaultValues();
+                    Reset();
                     needSave = true;
                 }
             }
             else
             {
                 _logger.Warning("Configuration file not found, creating a new one with default values");
-                SetDefaultValues();
-                needSave = true;
+                Reset();
             }
         }
         catch (Exception ex)
@@ -88,12 +78,12 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         }
         finally
         {
-            _configLock.Release();
+            _fileLock.Release();
         }
 
         if (loaded)
         {
-            if (ValidateProperties())
+            if (EnsureValidProperties())
             {
                 needSave = true;
             }
@@ -108,7 +98,8 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// </summary>
     public void Save()
     {
-        _configLock.Wait();
+        _fileLock.Wait();
+
         try
         {
             var directoryPath = Path.GetDirectoryName(ConfigPath);
@@ -116,9 +107,8 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
             {
                 Directory.CreateDirectory(directoryPath);
             }
-
-            var settings = new JsonSerializerSettings { Formatting = Formatting.Indented };
-            var json = JsonConvert.SerializeObject((T)this, settings);
+            
+            var json = JsonSerializer.Serialize(this as T);
             File.WriteAllText(ConfigPath, json);
         }
         catch (Exception ex)
@@ -127,62 +117,26 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         }
         finally
         {
-            _configLock.Release();
+            _fileLock.Release();
         }
     }
 
     /// <summary>
-    /// Resets all configuration data to default values and saves the changes.
+    /// Resets all configuration data to default values.
     /// </summary>
     public void Reset()
     {
-        SetDefaultValues();
-        Save();
+        Populate(Activator.CreateInstance<T>());
     }
-
-    private void ClearCollections()
+  
+    /// <summary>
+    /// Validates and corrects the properties of the configuration object by setting default values for invalid properties.
+    /// </summary>
+    /// <returns>True if any properties were corrected, otherwise false.</returns>
+    public bool EnsureValidProperties()
     {
-        foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite && p.PropertyType.GetInterfaces().Any(i =>
-                     i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(ICollection<>) ||
-                                         i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))))
-        {
-            if (prop.PropertyType.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>)))
-            {
-                var collection = prop.GetValue(this) as IList;
-                collection?.Clear();
-            }
-            else if (prop.PropertyType.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
-            {
-                var dictionary = prop.GetValue(this) as IDictionary;
-                dictionary?.Clear();
-            }
-        }
-    }
-
-    private void SetDefaultValues()
-    {
-        foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
-        {
-            try
-            {
-                var defaultValueAttr = prop.GetCustomAttributes(typeof(DefaultValueAttribute), true).OfType<DefaultValueAttribute>()
-                    .FirstOrDefault();
-
-                if (defaultValueAttr != null)
-                {
-                    prop.SetValue(this, defaultValueAttr.Value);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error occurred while setting default values");
-            }
-        }
-    }
-
-    private bool ValidateProperties()
-    {
-        var needSave = false;
+        var changesMade = false;
+        var defaultInstance = Activator.CreateInstance<T>();
 
         foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
         {
@@ -194,28 +148,31 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
                 var isValid = Validator.TryValidateProperty(prop.GetValue(this), validationContext, results);
                 if (isValid)
                     continue;
-                
-                _logger.Warning("Validation error for the property value '{PropName}':", prop.Name);
+
+                _logger.Warning("Validation error for property '{PropName}':", prop.Name);
                 foreach (var validationResult in results)
                 {
-                    _logger.Warning("  - {ErrorMessage}", validationResult.ErrorMessage);
+                    _logger.Warning(" - {ErrorMessage}", validationResult.ErrorMessage);
                 }
 
-                var defaultValueAttr = prop.GetCustomAttributes(typeof(DefaultValueAttribute), true).OfType<DefaultValueAttribute>()
-                    .FirstOrDefault();
-
-                if (defaultValueAttr == null)
-                    continue;
-                
-                prop.SetValue(this, defaultValueAttr.Value);
-                needSave = true;
+                prop.SetValue(this, prop.GetValue(defaultInstance));
+                _logger.Information("Set default value for property '{PropName}'", prop.Name);
+                changesMade = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error occurred while validating the configuration");
+                _logger.Error(ex, "An error occurred during configuration validation");
             }
         }
 
-        return needSave;
+        return changesMade;
+    }
+
+    private void Populate(T target)
+    {
+        foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
+        {
+            prop.SetValue(this, prop.GetValue(target));
+        }
     }
 }
