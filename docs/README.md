@@ -102,7 +102,7 @@ namespace HardDev.ConfigExamples;
 public static class Program
 {
     // Configure the logger for the example class
-    private static readonly ILogger Logger = AppLogger.Configure(new LoggerConfig { EnableFileLogging = false });
+    private static readonly ILogger Logger = AppLogger.Build(new LoggerConfig { EnableFile = false });
 
     public static void Main()
     {
@@ -160,15 +160,15 @@ using HardDev.CoreUtils.Logging;
 using Serilog.Events;
 
 // Configure the logger
-var loggerConfig = new AppLoggerConfig
+var cfg = new LoggerConfig
 {
-    LogDirectory = "Logs",
-    EnableConsoleLogging = true,
-    EnableFileLogging = true,
+    LogPath = "Logs",
+    EnableConsole = true,
+    EnableFile = true,
     ConsoleLogLevel = LogEventLevel.Debug,
     FileLogLevel = LogEventLevel.Verbose,
 };
-var logger = AppLogger.Configure(loggerConfig);
+var logger = AppLogger.Build(cfg);
 
 // Log a message
 logger.Information("Hello, World!");
@@ -185,7 +185,7 @@ try
 }
 catch (Exception ex)
 {
-    AppLogger.Log.Error(ex, "An error occurred");
+    AppLogger.Instance.Error(ex, "An error occurred");
 }
 ```
 
@@ -194,7 +194,7 @@ catch (Exception ex)
 ``` csharp
 int currentUsers = 50;
 int maxUsers = 100;
-AppLogger.Log.Warning("Current users reached {CurrentUsers} out of {MaxUsers}", currentUsers, maxUsers);
+AppLogger.Instance.Warning("Current users reached {CurrentUsers} out of {MaxUsers}", currentUsers, maxUsers);
 ```
 
 3. Scoped logger with context:

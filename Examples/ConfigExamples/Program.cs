@@ -7,7 +7,7 @@ namespace HardDev.ConfigExamples;
 public static class Program
 {
     // Configure the logger for the example class
-    private static readonly ILogger Logger = AppLogger.Configure(new LoggerConfig { EnableFileLogging = false });
+    private static readonly ILogger Logger = AppLogger.Build(new LoggerConfig { EnableFile = false });
 
     public static void Main()
     {
