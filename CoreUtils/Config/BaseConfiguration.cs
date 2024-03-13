@@ -18,7 +18,7 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     [JsonIgnore]
     public string ConfigPath { get; }
 
-    private readonly ILogger _logger = AppLogger.ForName(typeof(T).Name);
+    private readonly ILogger _logger = AppLogger.ForContext(typeof(T).Name);
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.

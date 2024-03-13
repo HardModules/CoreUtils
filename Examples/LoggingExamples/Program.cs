@@ -7,7 +7,7 @@ namespace HardDev.LoggingExamples
     public static class Program
     {
         // A default logger configuration, useful for most cases
-        private static readonly ILogger DefaultLogger = AppLogger.ForName(nameof(Program));
+        private static readonly ILogger DefaultLogger = AppLogger.ForContext(nameof(Program));
 
         // A custom logger tailored to specific needs
         private static readonly ILogger CustomLogger = CreateCustomLogger();
@@ -43,13 +43,13 @@ namespace HardDev.LoggingExamples
         {
             var customConfig = new LoggerConfig
             {
-                LoggerContextName = "CustomContext",
-                LogDirectory = "CustomLogs",
-                LogFileName = "custom_log_.txt",
+                ContextName = "CustomContext",
+                LogPath = "CustomLogs",
+                FileName = "custom_log_.txt",
                 OutputTemplate = "{Timestamp:HH:mm:ss}|{Level:u1}|{Context}|CUSTOM {Message:lj}{NewLine}{Exception}",
-                EnableConsoleLogging = true,
-                EnableDebugLogging = true,
-                EnableFileLogging = true,
+                EnableConsole = true,
+                EnableDebug = true,
+                EnableFile = true,
                 ConsoleLogLevel = LogEventLevel.Information,
                 DebugLogLevel = LogEventLevel.Verbose,
                 FileLogLevel = LogEventLevel.Warning
