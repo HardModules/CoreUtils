@@ -102,7 +102,7 @@ public static class AppLogger
     /// <returns>A new logger instance with the provided context name.</returns>
     public static ILogger ForContext(string name)
     {
-        return Log.ForContext("Context", name);
+        return Instance.ForContext("Context", name);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public static class AppLogger
     /// <returns>A new logger instance with the provided context type.</returns>
     public static ILogger ForContext<T>()
     {
-        return Log.ForContext("Context", nameof(T));
+        return Instance.ForContext("Context", nameof(T));
     }
 
     /// <summary>
