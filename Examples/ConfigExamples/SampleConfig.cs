@@ -52,6 +52,8 @@ public class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/SampleCon
     /// <summary>
     /// Gets or sets a dictionary with string keys and integer values.
     /// </summary>
-    [Required(ErrorMessage = "Example dictionary cannot be null"), MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
-    public IDictionary<string, int> ExampleDictionary { get; set; } = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
+    [Required(ErrorMessage = "Example dictionary cannot be null"),
+     MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
+    public IDictionary<string, int> ExampleDictionary { get; set; } =
+        new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 }

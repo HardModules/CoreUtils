@@ -11,11 +11,8 @@ public static class Program
 
     public static void Main()
     {
-        // Get or create a SampleConfig instance
-        var sampleConfig = AppConfig.Get<SampleConfig>();
-
-        Logger.Information("Loaded configuration from file");
-        sampleConfig.Load();
+        // Get or load a SampleConfig instance
+        var sampleConfig = AppConfig.GetOrLoad<SampleConfig>();
 
         Logger.Information("Loaded values from SampleConfig:");
         Logger.Information("IntegerValue: {IntegerValue}", sampleConfig.IntegerValue);

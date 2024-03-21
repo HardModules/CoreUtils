@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using HardDev.CoreUtils.Logging;
@@ -10,7 +11,7 @@ namespace HardDev.CoreUtils.Config;
 /// A base class for handling configuration files.
 /// </summary>
 /// <typeparam name="T">The type of configuration derived from this base class.</typeparam>
-public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfiguration<T>
+public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseConfiguration<T>
 {
     /// <summary>
     /// Gets the path to the configuration file.
@@ -32,7 +33,8 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
     /// <summary>
     /// Loads the configuration data from the file.
     /// </summary>
-    public void Load()
+    /// <returns>The current instance of the configuration.</returns>
+    public T Load()
     {
         try
         {
@@ -70,12 +72,15 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         {
             _logger.Error(ex, "Error occurred while loading the configuration");
         }
+
+        return this as T;
     }
 
     /// <summary>
     /// Saves the current configuration data to the file.
     /// </summary>
-    public void Save()
+    /// <returns>The current instance of the configuration.</returns>
+    public T Save()
     {
         try
         {
@@ -92,14 +97,19 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         {
             _logger.Error(ex, "Error occurred while saving the configuration");
         }
+
+        return this as T;
     }
 
     /// <summary>
     /// Resets all configuration data to default values.
     /// </summary>
-    public void Reset()
+    /// <returns>The current instance of the configuration.</returns>
+    public T Reset()
     {
         Populate(Activator.CreateInstance<T>());
+
+        return this as T;
     }
 
     /// <summary>
@@ -111,7 +121,8 @@ public abstract class BaseConfiguration<T> : IConfiguration where T : BaseConfig
         var changesMade = false;
         var defaultInstance = Activator.CreateInstance<T>();
 
-        foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
+        foreach (var prop in typeof(T).GetProperties()
+                     .Where(p => p.CanRead && p.CanWrite && p.GetCustomAttribute<JsonIgnoreAttribute>() == null))
         {
             try
             {

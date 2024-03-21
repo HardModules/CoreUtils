@@ -16,7 +16,7 @@ namespace HardDev.LoggingExamples
         {
             // Register global event handlers for logging
             AppLogger.RegisterGlobalEventHandlers();
-            
+
             // Examples of logging messages at various levels using the default logger
             DefaultLogger.Verbose("This is a verbose log message");
             DefaultLogger.Debug("This is a debug log message");

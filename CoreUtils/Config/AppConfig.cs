@@ -7,7 +7,7 @@ namespace HardDev.CoreUtils.Config;
 /// </summary>
 public static class AppConfig
 {
-    private static readonly ConcurrentDictionary<string, IConfiguration> Configurations = new();
+    private static readonly ConcurrentDictionary<string, IConfiguration<object>> Configurations = new();
 
     /// <summary>
     /// Gets the instance of the requested configuration type.
@@ -18,6 +18,17 @@ public static class AppConfig
     public static T Get<T>() where T : BaseConfiguration<T>, new()
     {
         return Configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
+    }
+
+    /// <summary>
+    /// Gets the instance of the requested configuration type by name.
+    /// If an instance does not exist, creates a new one and loads it.
+    /// </summary>
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <returns>An instance of the requested configuration type.</returns>
+    public static T GetOrLoad<T>() where T : BaseConfiguration<T>, new()
+    {
+        return Configurations.GetOrAdd(typeof(T).FullName!, _ => new T().Load()) as T;
     }
 
     /// <summary>
