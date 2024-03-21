@@ -19,6 +19,12 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     [JsonIgnore]
     public string ConfigPath { get; }
 
+    /// <summary>
+    /// Gets or sets the JSON serialization options.
+    /// </summary>
+    [JsonIgnore]
+    public JsonSerializerOptions SerializerOptions { get; set; }
+
     private readonly ILogger _logger = AppLogger.ForContext(typeof(T).Name);
 
     /// <summary>
@@ -46,7 +52,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                 {
                     try
                     {
-                        Populate(JsonSerializer.Deserialize<T>(content));
+                        Populate(JsonSerializer.Deserialize<T>(content, SerializerOptions));
                         EnsureValidProperties();
                     }
                     catch (JsonException)
@@ -90,7 +96,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                 Directory.CreateDirectory(directoryPath);
             }
 
-            var json = JsonSerializer.Serialize(this as T);
+            var json = JsonSerializer.Serialize(this as T, SerializerOptions);
             File.WriteAllText(ConfigPath, json);
         }
         catch (Exception ex)
