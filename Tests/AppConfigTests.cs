@@ -15,7 +15,8 @@ public class AppConfigTests : IDisposable
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
         public string TestString { get; set; } = "default string";
-        [Range(1, 100)] public int TestInt { get; set; } = 42;
+        [Range(1, 100)]
+        public int TestInt { get; set; } = 42;
         public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
         public int[] TestArray { get; set; } = [1, 2, 3];
     }
@@ -142,6 +143,20 @@ public class AppConfigTests : IDisposable
         CollectionAssert.AreEqual(new List<string> { "item3", "item4" }, config.TestList);
         CollectionAssert.AreEqual(new Dictionary<string, int> { { "key3", 3 }, { "key4", 4 } }, config.TestDictionary);
         CollectionAssert.AreEqual(new[] { 4, 5, 6 }, config.TestArray);
+    }
+
+    [TestMethod]
+    public void SaveAndLoad_ConfigValues()
+    {
+        var config = AppConfig.GetOrLoad<TestConfiguration>();
+        config.TestString = "modified string";
+        config.Save();
+        
+        AppConfig.Clear();
+        
+        config = AppConfig.GetOrLoad<TestConfiguration>();
+
+        Assert.AreEqual("modified string", config.TestString);
     }
 
     [TestMethod]
