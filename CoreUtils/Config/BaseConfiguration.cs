@@ -52,19 +52,19 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                     catch (JsonException)
                     {
                         _logger.Warning(
-                            "Configuration file contains invalid JSON. Using default values and updating the file");
+                            "Configuration file contains invalid JSON");
                         Reset();
                     }
                 }
                 else
                 {
-                    _logger.Warning("Configuration file is empty. Using default values and updating the file");
+                    _logger.Warning("Configuration file is empty");
                     Reset();
                 }
             }
             else
             {
-                _logger.Warning("Configuration file not found, creating a new one with default values");
+                _logger.Warning("Configuration file not found");
                 Reset();
             }
         }
