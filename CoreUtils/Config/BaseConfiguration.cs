@@ -25,7 +25,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     [JsonIgnore]
     public JsonSerializerOptions SerializerOptions { get; set; }
 
-    private readonly ILogger _logger = AppLogger.ForContext(typeof(T).Name);
+    private readonly ILogger _logger = AppLogger.ForContext<T>();
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.

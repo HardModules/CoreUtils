@@ -7,7 +7,7 @@ namespace HardDev.CoreUtils.Config;
 /// </summary>
 public static class AppConfig
 {
-    private static readonly ConcurrentDictionary<string, IConfiguration<object>> Configurations = new();
+    private static readonly ConcurrentDictionary<string, IConfiguration<object>> _configurations = new();
 
     /// <summary>
     /// Gets the instance of the requested configuration type.
@@ -17,7 +17,7 @@ public static class AppConfig
     /// <returns>An instance of the requested configuration type.</returns>
     public static T Get<T>() where T : BaseConfiguration<T>, new()
     {
-        return Configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
+        return _configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public static class AppConfig
     /// <returns>An instance of the requested configuration type.</returns>
     public static T GetOrLoad<T>() where T : BaseConfiguration<T>, new()
     {
-        return Configurations.GetOrAdd(typeof(T).FullName!, _ => new T().Load()) as T;
+        return _configurations.GetOrAdd(typeof(T).FullName!, _ => new T().Load()) as T;
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public static class AppConfig
     /// <returns>True if the configuration exists, false otherwise.</returns>
     public static bool Contains<T>() where T : BaseConfiguration<T>, new()
     {
-        return Configurations.ContainsKey(typeof(T).Name);
+        return _configurations.ContainsKey(typeof(T).Name);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public static class AppConfig
     /// <returns>True if the configuration was removed, false otherwise.</returns>
     public static bool Remove<T>() where T : BaseConfiguration<T>, new()
     {
-        return Configurations.TryRemove(typeof(T).Name, out _);
+        return _configurations.TryRemove(typeof(T).Name, out _);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class AppConfig
     /// </summary>
     public static void Clear()
     {
-        Configurations.Clear();
+        _configurations.Clear();
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public static class AppConfig
     /// </summary>
     public static void Load()
     {
-        foreach (var config in Configurations.Values)
+        foreach (var config in _configurations.Values)
         {
             config.Load();
         }
@@ -75,7 +75,7 @@ public static class AppConfig
     /// </summary>
     public static void Save()
     {
-        foreach (var config in Configurations.Values)
+        foreach (var config in _configurations.Values)
         {
             config.Save();
         }

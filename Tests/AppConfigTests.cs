@@ -8,20 +8,19 @@ namespace HardDev.Tests;
 [TestClass]
 public class AppConfigTests : IDisposable
 {
-    private const string CONFIG_FILE_NAME = "test_config.json";
-    private const string ANOTHER_TEST_CONFIG = "another_test_config.json";
+    private const string ConfigFileName = "test_config.json";
+    private const string AnotherTestConfig = "another_test_config.json";
 
-    public class TestConfiguration() : BaseConfiguration<TestConfiguration>(CONFIG_FILE_NAME)
+    public class TestConfiguration() : BaseConfiguration<TestConfiguration>(ConfigFileName)
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
         public string TestString { get; set; } = "default string";
-        [Range(1, 100)]
-        public int TestInt { get; set; } = 42;
+        [Range(1, 100)] public int TestInt { get; set; } = 42;
         public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
         public int[] TestArray { get; set; } = [1, 2, 3];
     }
 
-    public class AnotherTestConfiguration() : BaseConfiguration<AnotherTestConfiguration>(ANOTHER_TEST_CONFIG)
+    public class AnotherTestConfiguration() : BaseConfiguration<AnotherTestConfiguration>(AnotherTestConfig)
     {
         public string AnotherTestString { get; set; } = "second config";
         public int AnotherTestInt { get; set; } = 24;
@@ -32,11 +31,11 @@ public class AppConfigTests : IDisposable
     {
         AppConfig.Clear();
 
-        if (File.Exists(CONFIG_FILE_NAME))
-            File.Delete(CONFIG_FILE_NAME);
+        if (File.Exists(ConfigFileName))
+            File.Delete(ConfigFileName);
 
-        if (File.Exists(ANOTHER_TEST_CONFIG))
-            File.Delete(ANOTHER_TEST_CONFIG);
+        if (File.Exists(AnotherTestConfig))
+            File.Delete(AnotherTestConfig);
     }
 
     public void Dispose()
@@ -133,7 +132,7 @@ public class AppConfigTests : IDisposable
             ""TestDictionary"": { ""key3"": 3, ""key4"": 4 },
             ""TestArray"": [4, 5, 6]
         }";
-        File.WriteAllText(CONFIG_FILE_NAME, FILE_CONTENT);
+        File.WriteAllText(ConfigFileName, FILE_CONTENT);
 
         var config = AppConfig.Get<TestConfiguration>();
         config.Load();
@@ -151,9 +150,9 @@ public class AppConfigTests : IDisposable
         var config = AppConfig.GetOrLoad<TestConfiguration>();
         config.TestString = "modified string";
         config.Save();
-        
+
         AppConfig.Clear();
-        
+
         config = AppConfig.GetOrLoad<TestConfiguration>();
 
         Assert.AreEqual("modified string", config.TestString);
@@ -163,7 +162,7 @@ public class AppConfigTests : IDisposable
     public void Load_InvalidJson_UsesDefaultsAndUpdatesFile()
     {
         const string BROKEN_JSON = """@ "TestString": "modified string, "Test" """;
-        File.WriteAllText(CONFIG_FILE_NAME, BROKEN_JSON);
+        File.WriteAllText(ConfigFileName, BROKEN_JSON);
 
         var config = AppConfig.Get<TestConfiguration>();
 
@@ -175,7 +174,7 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        var configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
+        var configFileContent = File.ReadAllText(ConfigFileName);
         var deserializedConfig = JsonSerializer.Deserialize<TestConfiguration>(configFileContent);
 
         Assert.AreEqual(config.TestString, deserializedConfig.TestString);
@@ -188,7 +187,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_EmptyJson_LoadsDefaultValues()
     {
-        File.WriteAllText(CONFIG_FILE_NAME, string.Empty);
+        File.WriteAllText(ConfigFileName, string.Empty);
 
         var config = AppConfig.Get<TestConfiguration>();
         config.Load();
@@ -213,7 +212,7 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        Assert.IsTrue(File.Exists(CONFIG_FILE_NAME));
+        Assert.IsTrue(File.Exists(ConfigFileName));
     }
 
     [TestMethod]
@@ -247,10 +246,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void ValidateProperties_InvalidValue_SetsDefaultValue()
     {
-        var config = new TestConfiguration
-        {
-            TestInt = -1
-        };
+        var config = new TestConfiguration { TestInt = -1 };
 
         config.Load();
 
@@ -260,10 +256,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void EnsureValidProperties_InvalidValue_CorrectsValueAndIndicatesChange()
     {
-        var config = new TestConfiguration
-        {
-            TestInt = -1
-        };
+        var config = new TestConfiguration { TestInt = -1 };
 
         var result = config.EnsureValidProperties();
 

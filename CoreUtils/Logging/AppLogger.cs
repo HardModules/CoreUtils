@@ -10,68 +10,72 @@ namespace HardDev.CoreUtils.Logging;
 /// </summary>
 public static class AppLogger
 {
-    private static readonly LoggingLevelSwitch ConsoleLevelSwitch = new();
-    private static readonly LoggingLevelSwitch DebugLevelSwitch = new();
-    private static readonly LoggingLevelSwitch FileLevelSwitch = new();
+    private static readonly LoggingLevelSwitch _consoleLevelSwitch = new();
+    private static readonly LoggingLevelSwitch _debugLevelSwitch = new();
+    private static readonly LoggingLevelSwitch _fileLevelSwitch = new();
+
+    private static ILogger _instance;
 
     /// <summary>
     /// Gets or sets the currently configured logger instance.
     /// </summary>
-    public static ILogger Instance { get; private set; } = Build();
+    public static ILogger Instance
+    {
+        get { return _instance ??= Build(); }
+        set => _instance = value;
+    }
 
     /// <summary>
     /// Builds a logger using the provided logger configuration or creates a new default one if not provided.
     /// </summary>
-    /// <param name="cfg">The logger configuration to build with.</param>
+    /// <param name="appLoggerCfg">The logger configuration to build with.</param>
     /// <returns>The built logger instance.</returns>
-    public static ILogger Build(LoggerConfig cfg = null)
+    public static ILogger Build(LoggerConfig appLoggerCfg = null)
     {
-        cfg ??= new LoggerConfig();
+        appLoggerCfg ??= new LoggerConfig();
 
-        Directory.CreateDirectory(cfg.LogPath);
+        Directory.CreateDirectory(appLoggerCfg.LogPath);
 
-        ConsoleLevelSwitch.MinimumLevel = cfg.ConsoleLogLevel;
-        DebugLevelSwitch.MinimumLevel = cfg.DebugLogLevel;
-        FileLevelSwitch.MinimumLevel = cfg.FileLogLevel;
+        _consoleLevelSwitch.MinimumLevel = appLoggerCfg.ConsoleLogLevel;
+        _debugLevelSwitch.MinimumLevel = appLoggerCfg.DebugLogLevel;
+        _fileLevelSwitch.MinimumLevel = appLoggerCfg.FileLogLevel;
 
         var serilogCfg = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .Enrich.WithDemystifiedStackTraces();
 
-        if (cfg.EnableFile)
+        if (appLoggerCfg.EnableFile)
         {
             serilogCfg
-                .WriteTo.File(Path.Combine(cfg.LogPath, cfg.FileName),
-                    outputTemplate: cfg.OutputTemplate,
-                    rollingInterval: cfg.RollingInterval,
-                    retainedFileCountLimit: cfg.RetainedFileCountLimit,
-                    levelSwitch: FileLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
+                .WriteTo.File(Path.Combine(appLoggerCfg.LogPath, appLoggerCfg.FileName),
+                    outputTemplate: appLoggerCfg.OutputTemplate,
+                    rollingInterval: appLoggerCfg.RollingInterval,
+                    retainedFileCountLimit: appLoggerCfg.RetainedFileCountLimit,
+                    levelSwitch: _fileLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
-        if (cfg.EnableConsole)
+        if (appLoggerCfg.EnableConsole)
         {
             serilogCfg
-                .WriteTo.Console(outputTemplate: cfg.OutputTemplate,
-                    levelSwitch: ConsoleLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
+                .WriteTo.Console(outputTemplate: appLoggerCfg.OutputTemplate,
+                    levelSwitch: _consoleLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
-        if (cfg.EnableDebug)
+        if (appLoggerCfg.EnableDebug)
         {
             serilogCfg
-                .WriteTo.Debug(outputTemplate: cfg.OutputTemplate,
-                    levelSwitch: DebugLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
+                .WriteTo.Debug(outputTemplate: appLoggerCfg.OutputTemplate,
+                    levelSwitch: _debugLevelSwitch, formatProvider: CultureInfo.InvariantCulture);
         }
 
-        foreach (var sinkConfig in cfg.Sinks)
+        foreach (var sinkConfig in appLoggerCfg.Sinks)
         {
             serilogCfg.WriteTo.Sink(sinkConfig);
         }
 
-        Instance = serilogCfg
+        return serilogCfg
             .CreateLogger()
-            .ForContext("Context", cfg.ContextName);
-
-        return Instance;
+            .ForContext("Context", appLoggerCfg.ContextName);
     }
 
     /// <summary>
@@ -79,21 +83,21 @@ public static class AppLogger
     /// </summary>
     /// <param name="consoleLevel">The log event level for the console logger.</param>
     public static void SetConsoleMinLevel(LogEventLevel consoleLevel) =>
-        ConsoleLevelSwitch.MinimumLevel = consoleLevel;
+        _consoleLevelSwitch.MinimumLevel = consoleLevel;
 
     /// <summary>
     /// Sets the minimum debug logging level.
     /// </summary>
     /// <param name="consoleLevel">The log event level for the console logger.</param>
     public static void SetDebugMinLevel(LogEventLevel consoleLevel) =>
-        DebugLevelSwitch.MinimumLevel = consoleLevel;
+        _debugLevelSwitch.MinimumLevel = consoleLevel;
 
     /// <summary>
     /// Sets the minimum file logging level.
     /// </summary>
     /// <param name="fileLevel">The log event level for the file logger.</param>
     public static void SetFileMinLevel(LogEventLevel fileLevel) =>
-        FileLevelSwitch.MinimumLevel = fileLevel;
+        _fileLevelSwitch.MinimumLevel = fileLevel;
 
     /// <summary>
     /// Creates a logger instance with the provided context name.
