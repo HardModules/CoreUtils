@@ -73,9 +73,12 @@ public static class AppLogger
             serilogCfg.WriteTo.Sink(sinkConfig);
         }
 
-        return serilogCfg
+        var logger = serilogCfg
             .CreateLogger()
             .ForContext("Context", appLoggerCfg.ContextName);
+
+        _instance ??= logger;
+        return logger;
     }
 
     /// <summary>
