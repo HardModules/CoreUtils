@@ -6,7 +6,7 @@ namespace HardDev.ConfigExamples;
 /// <summary>
 /// A sample configuration to show how to derive from BaseConfiguration and use default values and validations.
 /// </summary>
-public class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/SampleConfig.json")
+public sealed class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/SampleConfig.json")
 {
     /// <summary>
     /// Gets or sets an integer value.

@@ -32,6 +32,33 @@ public static class AppConfig
     }
 
     /// <summary>
+    /// Gets the instance of the requested configuration type by name.
+    /// If an instance does not exist, creates a new one and loads it.
+    /// </summary>
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <param name="loaded">True if the configuration was loaded successfully, false otherwise.</param>
+    /// <returns>An instance of the requested configuration type.</returns>
+    public static T GetOrLoad<T>(out bool loaded) where T : BaseConfiguration<T>, new()
+    {
+        var name = typeof(T).FullName!;
+        T config;
+
+        if (_configurations.TryGetValue(name, out var value))
+        {
+            loaded = false;
+            config = (T)value;
+        }
+        else
+        {
+            config = new T();
+            config.Load(out loaded);
+            _configurations.TryAdd(name, config);
+        }
+
+        return config;
+    }
+
+    /// <summary>
     /// Determines if a configuration of the requested type exists.
     /// </summary>
     /// <typeparam name="T">The type of configuration to check.</typeparam>

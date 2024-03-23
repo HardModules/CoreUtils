@@ -23,9 +23,9 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     /// Gets or sets the JSON serialization options.
     /// </summary>
     [JsonIgnore]
-    public JsonSerializerOptions SerializerOptions { get; set; }
+    public JsonSerializerOptions Options { get; set; }
 
-    private readonly ILogger _logger = AppLogger.ForContext<T>();
+    private readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.
@@ -34,6 +34,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     protected BaseConfiguration(string configPath)
     {
         ConfigPath = configPath;
+        _logger = AppLogger.ForContext<T>();
     }
 
     /// <summary>
@@ -42,6 +43,18 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     /// <returns>The current instance of the configuration.</returns>
     public T Load()
     {
+        return Load(out _);
+    }
+
+    /// <summary>
+    /// Loads the configuration data from the file.
+    /// </summary>
+    /// <returns>The current instance of the configuration.</returns>
+    /// <param name="loaded">True if the configuration was loaded successfully, false otherwise.</param>
+    public T Load(out bool loaded)
+    {
+        loaded = false;
+
         try
         {
             if (File.Exists(ConfigPath))
@@ -52,13 +65,13 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                 {
                     try
                     {
-                        Populate(JsonSerializer.Deserialize<T>(content, SerializerOptions));
+                        Populate(JsonSerializer.Deserialize<T>(content, Options));
                         EnsureValidProperties();
+                        loaded = true;
                     }
                     catch (JsonException)
                     {
-                        _logger.Warning(
-                            "Configuration file contains invalid JSON");
+                        _logger.Warning("Configuration file contains invalid JSON");
                         Reset();
                     }
                 }
@@ -77,6 +90,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
         catch (Exception ex)
         {
             _logger.Error(ex, "Error occurred while loading the configuration");
+            Reset();
         }
 
         return this as T;
@@ -88,6 +102,18 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     /// <returns>The current instance of the configuration.</returns>
     public T Save()
     {
+        return Save(out _);
+    }
+
+    /// <summary>
+    /// Saves the current configuration data to the file.
+    /// </summary>
+    /// <returns>The current instance of the configuration.</returns>
+    /// <param name="saved">True if the configuration was saved successfully, false otherwise.</param>
+    public T Save(out bool saved)
+    {
+        saved = false;
+
         try
         {
             var directoryPath = Path.GetDirectoryName(ConfigPath);
@@ -96,8 +122,9 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                 Directory.CreateDirectory(directoryPath);
             }
 
-            var json = JsonSerializer.Serialize(this as T, SerializerOptions);
+            var json = JsonSerializer.Serialize(this as T, Options);
             File.WriteAllText(ConfigPath, json);
+            saved = true;
         }
         catch (Exception ex)
         {
@@ -114,7 +141,6 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     public T Reset()
     {
         Populate(Activator.CreateInstance<T>());
-
         return this as T;
     }
 

@@ -11,6 +11,19 @@ public class AppConfigTests : IDisposable
     private const string ConfigFileName = "test_config.json";
     private const string AnotherTestConfig = "another_test_config.json";
 
+    private const string NormJsonContent = """
+                                           {
+                                              "TestString": "modified string",
+                                              "TestInt": 888,
+                                              "TestList": ["item3", "item4"],
+                                              "TestDictionary": { "key3": 3, "key4": 4 },
+                                              "TestArray": [4, 5, 6]
+                                           }
+                                           """;
+
+    const string BrokenJsonContent = """@ "TestString": "modified string, "Test" """;
+
+
     public class TestConfiguration() : BaseConfiguration<TestConfiguration>(ConfigFileName)
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
@@ -125,23 +138,25 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_ConfigValuesAreLoadedFromFile()
     {
-        const string FILE_CONTENT = @"{
-            ""TestString"": ""modified string"",
-            ""TestInt"": 888,
-            ""TestList"": [""item3"", ""item4""],
-            ""TestDictionary"": { ""key3"": 3, ""key4"": 4 },
-            ""TestArray"": [4, 5, 6]
-        }";
-        File.WriteAllText(ConfigFileName, FILE_CONTENT);
+        File.WriteAllText(ConfigFileName, NormJsonContent);
 
-        var config = AppConfig.Get<TestConfiguration>();
-        config.Load();
+        var config = AppConfig.GetOrLoad<TestConfiguration>(out var loaded);
+
+        Assert.AreEqual(true, loaded);
 
         Assert.AreEqual("modified string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
         CollectionAssert.AreEqual(new List<string> { "item3", "item4" }, config.TestList);
         CollectionAssert.AreEqual(new Dictionary<string, int> { { "key3", 3 }, { "key4", 4 } }, config.TestDictionary);
         CollectionAssert.AreEqual(new[] { 4, 5, 6 }, config.TestArray);
+
+        AppConfig.Clear();
+
+        File.WriteAllText(ConfigFileName, BrokenJsonContent);
+
+        AppConfig.GetOrLoad<TestConfiguration>(out loaded);
+
+        Assert.AreEqual(false, loaded);
     }
 
     [TestMethod]
@@ -161,8 +176,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_InvalidJson_UsesDefaultsAndUpdatesFile()
     {
-        const string BROKEN_JSON = """@ "TestString": "modified string, "Test" """;
-        File.WriteAllText(ConfigFileName, BROKEN_JSON);
+        File.WriteAllText(ConfigFileName, BrokenJsonContent);
 
         var config = AppConfig.Get<TestConfiguration>();
 
