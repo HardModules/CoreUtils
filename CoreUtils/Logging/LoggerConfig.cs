@@ -22,7 +22,7 @@ public class LoggerConfig
     /// <summary>
     /// Gets or sets the log file name.
     /// </summary>
-    public string FileName { get; set; } = "app_.log";
+    public string FileName { get; set; } = "log_.log";
 
     /// <summary>
     /// Gets or sets the output template for the log messages.
