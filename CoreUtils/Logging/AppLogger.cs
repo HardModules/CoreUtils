@@ -75,7 +75,6 @@ public static class AppLogger
             .CreateLogger()
             .ForContext("Context", appLoggerCfg.ContextName);
 
-        _instance ??= logger;
         return logger;
     }
 
