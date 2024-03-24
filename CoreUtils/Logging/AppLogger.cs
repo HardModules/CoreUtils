@@ -34,8 +34,6 @@ public static class AppLogger
     {
         appLoggerCfg ??= new LoggerConfig();
 
-        Directory.CreateDirectory(appLoggerCfg.LogPath);
-
         _consoleLevelSwitch.MinimumLevel = appLoggerCfg.ConsoleLogLevel;
         _debugLevelSwitch.MinimumLevel = appLoggerCfg.DebugLogLevel;
         _fileLevelSwitch.MinimumLevel = appLoggerCfg.FileLogLevel;
