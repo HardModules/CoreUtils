@@ -25,7 +25,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     [JsonIgnore]
     public JsonSerializerOptions Options { get; set; }
 
-    private readonly ILogger _logger;
+    private readonly ILogger _logger = AppLogger.ForContext<T>();
 
     /// <summary>
     /// Initializes a new instance of the BaseConfiguration class.
@@ -34,7 +34,6 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     protected BaseConfiguration(string configPath)
     {
         ConfigPath = configPath;
-        _logger = AppLogger.ForContext<T>();
     }
 
     /// <summary>
