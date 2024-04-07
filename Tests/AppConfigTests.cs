@@ -140,7 +140,7 @@ public class AppConfigTests : IDisposable
     {
         File.WriteAllText(CONFIG_FILE_NAME, NORM_JSON_CONTENT);
 
-        var config = AppConfig.GetOrLoad<TestConfiguration>(out var loaded);
+        var config = AppConfig.GetOrLoad<TestConfiguration>(out bool loaded);
 
         Assert.AreEqual(true, loaded);
 
@@ -188,7 +188,7 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        var configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
+        string configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
         var deserializedConfig = JsonSerializer.Deserialize<TestConfiguration>(configFileContent);
 
         Assert.AreEqual(config.TestString, deserializedConfig.TestString);
@@ -272,7 +272,7 @@ public class AppConfigTests : IDisposable
     {
         var config = new TestConfiguration { TestInt = -1 };
 
-        var result = config.EnsureValidProperties();
+        bool result = config.EnsureValidProperties();
 
         Assert.AreEqual(42, config.TestInt);
         Assert.IsTrue(result);

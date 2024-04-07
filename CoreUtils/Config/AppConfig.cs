@@ -40,7 +40,7 @@ public static class AppConfig
     /// <returns>An instance of the requested configuration type.</returns>
     public static T GetOrLoad<T>(out bool loaded) where T : BaseConfiguration<T>, new()
     {
-        var name = typeof(T).FullName!;
+        string name = typeof(T).FullName!;
         T config;
 
         if (_configurations.TryGetValue(name, out var value))

@@ -58,7 +58,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
         {
             if (File.Exists(ConfigPath))
             {
-                var content = File.ReadAllText(ConfigPath);
+                string content = File.ReadAllText(ConfigPath);
 
                 if (!string.IsNullOrEmpty(content))
                 {
@@ -115,13 +115,13 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
 
         try
         {
-            var directoryPath = Path.GetDirectoryName(ConfigPath);
+            string directoryPath = Path.GetDirectoryName(ConfigPath);
             if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
 
-            var json = JsonSerializer.Serialize(this as T, Options);
+            string json = JsonSerializer.Serialize(this as T, Options);
             File.WriteAllText(ConfigPath, json);
             saved = true;
         }
@@ -149,7 +149,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     /// <returns>True if any properties were corrected, otherwise false.</returns>
     public bool EnsureValidProperties()
     {
-        var changesMade = false;
+        bool changesMade = false;
         var defaultInstance = Activator.CreateInstance<T>();
 
         foreach (var prop in typeof(T).GetProperties()
@@ -160,7 +160,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
                 var validationContext = new ValidationContext(this) { MemberName = prop.Name };
                 var results = new List<ValidationResult>();
 
-                var isValid = Validator.TryValidateProperty(prop.GetValue(this), validationContext, results);
+                bool isValid = Validator.TryValidateProperty(prop.GetValue(this), validationContext, results);
                 if (isValid)
                     continue;
 
