@@ -39,8 +39,7 @@ public static class AppLogger
         _fileLevelSwitch.MinimumLevel = appLoggerCfg.FileLogLevel;
 
         var serilogCfg = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .Enrich.WithDemystifiedStackTraces();
+            .MinimumLevel.Verbose();
 
         if (appLoggerCfg.EnableFile)
         {

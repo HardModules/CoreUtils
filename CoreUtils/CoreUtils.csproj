@@ -32,13 +32,12 @@
 
     <ItemGroup>
         <PackageReference Include="Serilog" Version="4.2.0" />
-        <PackageReference Include="Serilog.Enrichers.Demystifier" Version="1.0.3" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
         <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
         <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0"/>
-        <PackageReference Include="System.Text.Json" Version="9.0.0" />
+        <PackageReference Include="System.Text.Json" Version="8.0.5" />
     </ItemGroup>
 
 </Project>
