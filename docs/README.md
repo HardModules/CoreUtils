@@ -9,9 +9,10 @@ cleaner and more efficient code.
 ## Features
 
 - Advanced configuration handling with support for JSON files and built-in default values and validation.
+- Native JSON serialization support using source generators for better performance.
 - Easy-to-use logging setup built on top of the Serilog library.
 - Highly customizable logger configuration with adjustable log levels, output format, and more.
-- Supports .NET Standard 2.0, .NET Standard 2.1 and .NET 8.0 target frameworks
+- Supports .NET Standard 2.0, .NET Standard 2.1 and .NET 9.0 target frameworks
 
 ## Getting Started
 

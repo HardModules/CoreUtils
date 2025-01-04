@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using HardDev.CoreUtils.Config;
 
 namespace HardDev.ConfigExamples;
@@ -6,7 +7,7 @@ namespace HardDev.ConfigExamples;
 /// <summary>
 /// A sample configuration to show how to derive from BaseConfiguration and use default values and validations.
 /// </summary>
-public sealed class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/SampleConfig.json")
+public sealed class SampleConfig : BaseConfiguration<SampleConfig>
 {
     /// <summary>
     /// Gets or sets an integer value.
@@ -38,22 +39,39 @@ public sealed class SampleConfig() : BaseConfiguration<SampleConfig>("Configs/Sa
     /// <summary>
     /// Gets or sets a read-only list of strings representing accounts.
     /// </summary>
-    [Required(ErrorMessage = "Accounts cannot be null"),
-     MinLength(1, ErrorMessage = "Accounts cannot be empty")]
+    [Required(ErrorMessage = "Accounts cannot be null"), MinLength(1, ErrorMessage = "Accounts cannot be empty")]
     public IReadOnlyList<string> Accounts { get; set; } = new List<string> { "Account1", "Account2", "Account3" };
 
     /// <summary>
     /// Gets or sets a read-only list of integers representing numbers.
     /// </summary>
-    [Required(ErrorMessage = "Numbers cannot be null"),
-     MinLength(1, ErrorMessage = "Numbers cannot be empty")]
+    [Required(ErrorMessage = "Numbers cannot be null"), MinLength(1, ErrorMessage = "Numbers cannot be empty")]
     public IReadOnlyList<int> Numbers { get; set; } = new List<int> { 1, 2, 3 };
 
     /// <summary>
     /// Gets or sets a dictionary with string keys and integer values.
     /// </summary>
-    [Required(ErrorMessage = "Example dictionary cannot be null"),
-     MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
+    [
+        Required(ErrorMessage = "Example dictionary cannot be null"),
+        MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")
+    ]
     public IDictionary<string, int> ExampleDictionary { get; set; } =
         new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
+
+    /// <summary>
+    /// Initializes a new instance of the SampleConfig class.
+    /// </summary>
+    public SampleConfig()
+        : base("Configs/SampleConfig.json")
+    {
+        Options = SampleConfigContext.Default.Options;
+    }
 }
+
+[JsonSourceGenerationOptions(
+    WriteIndented = true,
+    PropertyNameCaseInsensitive = true,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase
+)]
+[JsonSerializable(typeof(SampleConfig))]
+internal partial class SampleConfigContext : JsonSerializerContext;
