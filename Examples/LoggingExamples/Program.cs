@@ -7,10 +7,10 @@ namespace HardDev.LoggingExamples
     public static class Program
     {
         // A default logger configuration, useful for most cases
-        private static readonly ILogger _defaultLogger = AppLogger.ForContext(nameof(Program));
+        private static readonly ILogger s_defaultLogger = AppLogger.ForContext(nameof(Program));
 
         // A custom logger tailored to specific needs
-        private static readonly ILogger _customLogger = CreateCustomLogger();
+        private static readonly ILogger s_customLogger = CreateCustomLogger();
 
         public static async Task Main()
         {
@@ -18,12 +18,12 @@ namespace HardDev.LoggingExamples
             AppLogger.RegisterGlobalEventHandlers();
 
             // Examples of logging messages at various levels using the default logger
-            _defaultLogger.Verbose("This is a verbose log message");
-            _defaultLogger.Debug("This is a debug log message");
-            _defaultLogger.Information("This is an information log message");
-            _defaultLogger.Warning("This is a warning log message");
-            _defaultLogger.Error("This is an error log message");
-            _defaultLogger.Fatal("This is a fatal log message");
+            s_defaultLogger.Verbose("This is a verbose log message");
+            s_defaultLogger.Debug("This is a debug log message");
+            s_defaultLogger.Information("This is an information log message");
+            s_defaultLogger.Warning("This is a warning log message");
+            s_defaultLogger.Error("This is an error log message");
+            s_defaultLogger.Fatal("This is a fatal log message");
 
             try
             {
@@ -31,12 +31,12 @@ namespace HardDev.LoggingExamples
             }
             catch (Exception ex)
             {
-                _defaultLogger.Error(ex, "An exception occurred");
+                s_defaultLogger.Error(ex, "An exception occurred");
             }
 
             // Examples of logging messages with custom logger
-            _customLogger.Information("Custom logger: This is an information log message");
-            _customLogger.Warning("Custom logger: This is a warning log message");
+            s_customLogger.Information("Custom logger: This is an information log message");
+            s_customLogger.Warning("Custom logger: This is a warning log message");
         }
 
         private static ILogger CreateCustomLogger()

@@ -8,32 +8,35 @@ namespace HardDev.Tests;
 [TestClass]
 public class AppConfigTests : IDisposable
 {
-    private const string CONFIG_FILE_NAME = "test_config.json";
-    private const string ANOTHER_TEST_CONFIG = "another_test_config.json";
+    private const string ConfigFileName = "test_config.json";
+    private const string AnotherTestConfig = "another_test_config.json";
 
-    private const string NORM_JSON_CONTENT = """
-                                             {
-                                                "TestString": "modified string",
-                                                "TestInt": 888,
-                                                "TestList": ["item3", "item4"],
-                                                "TestDictionary": { "key3": 3, "key4": 4 },
-                                                "TestArray": [4, 5, 6]
-                                             }
-                                             """;
+    private const string NormJsonContent = """
+                                           {
+                                              "TestString": "modified string",
+                                              "TestInt": 888,
+                                              "TestList": ["item3", "item4"],
+                                              "TestDictionary": { "key3": 3, "key4": 4 },
+                                              "TestArray": [4, 5, 6]
+                                           }
+                                           """;
 
-    private const string BROKEN_JSON_CONTENT = """@ "TestString": "modified string, "Test" """;
+    private const string BrokenJsonContent = """@ "TestString": "modified string, "Test" """;
 
 
-    public class TestConfiguration() : BaseConfiguration<TestConfiguration>(CONFIG_FILE_NAME)
+    public class TestConfiguration() : BaseConfiguration<TestConfiguration>(ConfigFileName)
     {
         public List<string> TestList { get; set; } = ["item1", "item2"];
         public string TestString { get; set; } = "default string";
-        [Range(1, 100)] public int TestInt { get; set; } = 42;
+
+        [Range(1, 100)]
+        public int TestInt { get; set; } = 42;
+
         public Dictionary<string, int> TestDictionary { get; set; } = new() { ["key1"] = 1, ["key2"] = 2 };
         public int[] TestArray { get; set; } = [1, 2, 3];
     }
 
-    public class AnotherTestConfiguration() : BaseConfiguration<AnotherTestConfiguration>(ANOTHER_TEST_CONFIG)
+    public class AnotherTestConfiguration() : BaseConfiguration<AnotherTestConfiguration>(AnotherTestConfig)
     {
         public string AnotherTestString { get; set; } = "second config";
         public int AnotherTestInt { get; set; } = 24;
@@ -44,11 +47,15 @@ public class AppConfigTests : IDisposable
     {
         AppConfig.Clear();
 
-        if (File.Exists(CONFIG_FILE_NAME))
-            File.Delete(CONFIG_FILE_NAME);
+        if (File.Exists(ConfigFileName))
+        {
+            File.Delete(ConfigFileName);
+        }
 
-        if (File.Exists(ANOTHER_TEST_CONFIG))
-            File.Delete(ANOTHER_TEST_CONFIG);
+        if (File.Exists(AnotherTestConfig))
+        {
+            File.Delete(AnotherTestConfig);
+        }
     }
 
     public void Dispose()
@@ -60,7 +67,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Get_DefaultValues_AreSetCorrectly()
     {
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
 
         Assert.AreEqual("default string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
@@ -72,7 +79,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Save_ConfigValuesAreSavedToFile()
     {
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
         config.TestString = "new string";
         config.TestInt = 99;
         config.TestList.Add("item3");
@@ -81,7 +88,7 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        var testConfiguration = AppConfig.Get<TestConfiguration>();
+        TestConfiguration testConfiguration = AppConfig.Get<TestConfiguration>();
 
         Assert.AreEqual(config.TestString, testConfiguration.TestString);
         Assert.AreEqual(config.TestInt, testConfiguration.TestInt);
@@ -93,7 +100,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Reset_RevertsConfigToDefaultValues()
     {
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
 
         config.TestString = "new string";
         config.TestInt = 99;
@@ -113,7 +120,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Save_NewConfigValuesAreReturnedViaGet()
     {
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
 
         config.TestString = "new string";
         config.TestInt = 99;
@@ -124,7 +131,7 @@ public class AppConfigTests : IDisposable
         config.Save();
 
         AppConfig.Clear();
-        var newConfig = AppConfig.Get<TestConfiguration>();
+        TestConfiguration newConfig = AppConfig.Get<TestConfiguration>();
         newConfig.Load();
 
         Assert.AreEqual("new string", newConfig.TestString);
@@ -138,11 +145,11 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_ConfigValuesAreLoadedFromFile()
     {
-        File.WriteAllText(CONFIG_FILE_NAME, NORM_JSON_CONTENT);
+        File.WriteAllText(ConfigFileName, NormJsonContent);
 
-        var config = AppConfig.GetOrLoad<TestConfiguration>(out bool loaded);
+        TestConfiguration config = AppConfig.GetOrLoad<TestConfiguration>(out bool loaded);
 
-        Assert.AreEqual(true, loaded);
+        Assert.IsTrue(loaded);
 
         Assert.AreEqual("modified string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
@@ -152,7 +159,7 @@ public class AppConfigTests : IDisposable
 
         AppConfig.Clear();
 
-        File.WriteAllText(CONFIG_FILE_NAME, BROKEN_JSON_CONTENT);
+        File.WriteAllText(ConfigFileName, BrokenJsonContent);
 
         AppConfig.GetOrLoad<TestConfiguration>(out loaded);
 
@@ -162,7 +169,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void SaveAndLoad_ConfigValues()
     {
-        var config = AppConfig.GetOrLoad<TestConfiguration>();
+        TestConfiguration config = AppConfig.GetOrLoad<TestConfiguration>();
         config.TestString = "modified string";
         config.Save();
 
@@ -176,9 +183,9 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_InvalidJson_UsesDefaultsAndUpdatesFile()
     {
-        File.WriteAllText(CONFIG_FILE_NAME, BROKEN_JSON_CONTENT);
+        File.WriteAllText(ConfigFileName, BrokenJsonContent);
 
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
 
         Assert.AreEqual("default string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
@@ -188,8 +195,8 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        string configFileContent = File.ReadAllText(CONFIG_FILE_NAME);
-        var deserializedConfig = JsonSerializer.Deserialize<TestConfiguration>(configFileContent);
+        string configFileContent = File.ReadAllText(ConfigFileName);
+        TestConfiguration deserializedConfig = JsonSerializer.Deserialize<TestConfiguration>(configFileContent);
 
         Assert.AreEqual(config.TestString, deserializedConfig.TestString);
         Assert.AreEqual(config.TestInt, deserializedConfig.TestInt);
@@ -201,9 +208,9 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_EmptyJson_LoadsDefaultValues()
     {
-        File.WriteAllText(CONFIG_FILE_NAME, string.Empty);
+        File.WriteAllText(ConfigFileName, string.Empty);
 
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
         config.Load();
 
         Assert.AreEqual("default string", config.TestString);
@@ -216,7 +223,7 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void Load_DefaultAndSaveIfFileMissing()
     {
-        var config = AppConfig.Get<TestConfiguration>();
+        TestConfiguration config = AppConfig.Get<TestConfiguration>();
 
         Assert.AreEqual("default string", config.TestString);
         Assert.AreEqual(42, config.TestInt);
@@ -226,14 +233,14 @@ public class AppConfigTests : IDisposable
 
         config.Save();
 
-        Assert.IsTrue(File.Exists(CONFIG_FILE_NAME));
+        Assert.IsTrue(File.Exists(ConfigFileName));
     }
 
     [TestMethod]
     public void Get_CanHandleTwoConfigurationTypes()
     {
-        var firstConfig = AppConfig.Get<TestConfiguration>();
-        var secondConfig = AppConfig.Get<AnotherTestConfiguration>();
+        TestConfiguration firstConfig = AppConfig.Get<TestConfiguration>();
+        AnotherTestConfiguration secondConfig = AppConfig.Get<AnotherTestConfiguration>();
 
         Assert.AreEqual("default string", firstConfig.TestString);
         Assert.AreEqual(42, firstConfig.TestInt);
@@ -245,13 +252,13 @@ public class AppConfigTests : IDisposable
     [TestMethod]
     public void ClearConfiguration_RemovesAllCachedConfigurations()
     {
-        var firstConfig = AppConfig.Get<TestConfiguration>();
+        TestConfiguration firstConfig = AppConfig.Get<TestConfiguration>();
 
         firstConfig.TestString = "new value";
 
         AppConfig.Clear();
 
-        var secondConfig = AppConfig.Get<TestConfiguration>();
+        TestConfiguration secondConfig = AppConfig.Get<TestConfiguration>();
 
         Assert.AreNotSame(firstConfig, secondConfig);
         Assert.AreEqual("default string", secondConfig.TestString);

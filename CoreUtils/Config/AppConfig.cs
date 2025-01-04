@@ -7,7 +7,7 @@ namespace HardDev.CoreUtils.Config;
 /// </summary>
 public static class AppConfig
 {
-    private static readonly ConcurrentDictionary<string, IConfiguration<object>> _configurations = new();
+    private static readonly ConcurrentDictionary<string, IConfiguration<object>> s_configurations = new();
 
     /// <summary>
     /// Gets the instance of the requested configuration type.
@@ -15,9 +15,10 @@ public static class AppConfig
     /// </summary>
     /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
     /// <returns>An instance of the requested configuration type.</returns>
-    public static T Get<T>() where T : BaseConfiguration<T>, new()
+    public static T Get<T>()
+        where T : BaseConfiguration<T>, new()
     {
-        return _configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
+        return s_configurations.GetOrAdd(typeof(T).FullName!, _ => new T()) as T;
     }
 
     /// <summary>
@@ -26,9 +27,10 @@ public static class AppConfig
     /// </summary>
     /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
     /// <returns>An instance of the requested configuration type.</returns>
-    public static T GetOrLoad<T>() where T : BaseConfiguration<T>, new()
+    public static T GetOrLoad<T>()
+        where T : BaseConfiguration<T>, new()
     {
-        return _configurations.GetOrAdd(typeof(T).FullName!, _ => new T().Load()) as T;
+        return s_configurations.GetOrAdd(typeof(T).FullName!, _ => new T().Load()) as T;
     }
 
     /// <summary>
@@ -38,12 +40,13 @@ public static class AppConfig
     /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
     /// <param name="loaded">True if the configuration was loaded successfully, false otherwise.</param>
     /// <returns>An instance of the requested configuration type.</returns>
-    public static T GetOrLoad<T>(out bool loaded) where T : BaseConfiguration<T>, new()
+    public static T GetOrLoad<T>(out bool loaded)
+        where T : BaseConfiguration<T>, new()
     {
         string name = typeof(T).FullName!;
         T config;
 
-        if (_configurations.TryGetValue(name, out var value))
+        if (s_configurations.TryGetValue(name, out IConfiguration<object> value))
         {
             loaded = false;
             config = (T)value;
@@ -52,7 +55,7 @@ public static class AppConfig
         {
             config = new T();
             config.Load(out loaded);
-            _configurations.TryAdd(name, config);
+            s_configurations.TryAdd(name, config);
         }
 
         return config;
@@ -63,9 +66,10 @@ public static class AppConfig
     /// </summary>
     /// <typeparam name="T">The type of configuration to check.</typeparam>
     /// <returns>True if the configuration exists, false otherwise.</returns>
-    public static bool Contains<T>() where T : BaseConfiguration<T>, new()
+    public static bool Contains<T>()
+        where T : BaseConfiguration<T>, new()
     {
-        return _configurations.ContainsKey(typeof(T).Name);
+        return s_configurations.ContainsKey(typeof(T).Name);
     }
 
     /// <summary>
@@ -73,9 +77,10 @@ public static class AppConfig
     /// </summary>
     /// <typeparam name="T">The type of configuration to remove.</typeparam>
     /// <returns>True if the configuration was removed, false otherwise.</returns>
-    public static bool Remove<T>() where T : BaseConfiguration<T>, new()
+    public static bool Remove<T>()
+        where T : BaseConfiguration<T>, new()
     {
-        return _configurations.TryRemove(typeof(T).Name, out _);
+        return s_configurations.TryRemove(typeof(T).Name, out _);
     }
 
     /// <summary>
@@ -83,7 +88,7 @@ public static class AppConfig
     /// </summary>
     public static void Clear()
     {
-        _configurations.Clear();
+        s_configurations.Clear();
     }
 
     /// <summary>
@@ -91,7 +96,7 @@ public static class AppConfig
     /// </summary>
     public static void Load()
     {
-        foreach (var config in _configurations.Values)
+        foreach (IConfiguration<object> config in s_configurations.Values)
         {
             config.Load();
         }
@@ -102,7 +107,7 @@ public static class AppConfig
     /// </summary>
     public static void Save()
     {
-        foreach (var config in _configurations.Values)
+        foreach (IConfiguration<object> config in s_configurations.Values)
         {
             config.Save();
         }

@@ -51,12 +51,8 @@ public sealed class SampleConfig : BaseConfiguration<SampleConfig>
     /// <summary>
     /// Gets or sets a dictionary with string keys and integer values.
     /// </summary>
-    [
-        Required(ErrorMessage = "Example dictionary cannot be null"),
-        MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")
-    ]
-    public IDictionary<string, int> ExampleDictionary { get; set; } =
-        new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
+    [Required(ErrorMessage = "Example dictionary cannot be null"), MinLength(1, ErrorMessage = "ExampleDictionary cannot be empty")]
+    public IDictionary<string, int> ExampleDictionary { get; set; } = new Dictionary<string, int> { { "Key1", 1 }, { "Key2", 2 } };
 
     /// <summary>
     /// Initializes a new instance of the SampleConfig class.
@@ -68,6 +64,10 @@ public sealed class SampleConfig : BaseConfiguration<SampleConfig>
     }
 }
 
+/// <summary>
+/// Source-generated JSON serialization context for SampleConfig, enabling native AOT support
+/// and optimized serialization with indented output, case-insensitive properties in camelCase.
+/// </summary>
 [JsonSourceGenerationOptions(
     WriteIndented = true,
     PropertyNameCaseInsensitive = true,

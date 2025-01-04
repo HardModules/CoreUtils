@@ -73,5 +73,5 @@ public class LoggerConfig
     /// <summary>
     /// Gets or sets the additional sinks for logger configuration.
     /// </summary>
-    public List<ILogEventSink> Sinks { get; } = [];
+    public List<ILogEventSink> Sinks { get; set; } = [];
 }

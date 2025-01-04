@@ -150,9 +150,9 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     public bool EnsureValidProperties()
     {
         bool changesMade = false;
-        var defaultInstance = Activator.CreateInstance<T>();
+        T defaultInstance = Activator.CreateInstance<T>();
 
-        foreach (var prop in typeof(T).GetProperties()
+        foreach (PropertyInfo prop in typeof(T).GetProperties()
                      .Where(p => p.CanRead && p.CanWrite && p.GetCustomAttribute<JsonIgnoreAttribute>() == null))
         {
             try
@@ -162,10 +162,12 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
 
                 bool isValid = Validator.TryValidateProperty(prop.GetValue(this), validationContext, results);
                 if (isValid)
+                {
                     continue;
+                }
 
                 _logger.Warning("Validation error for property '{PropName}':", prop.Name);
-                foreach (var validationResult in results)
+                foreach (ValidationResult validationResult in results)
                 {
                     _logger.Warning(" - {ErrorMessage}", validationResult.ErrorMessage);
                 }
@@ -189,7 +191,7 @@ public abstract class BaseConfiguration<T> : IConfiguration<T> where T : BaseCon
     /// <param name="target"></param>
     private void Populate(T target)
     {
-        foreach (var prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
+        foreach (PropertyInfo prop in typeof(T).GetProperties().Where(p => p.CanRead && p.CanWrite))
         {
             prop.SetValue(this, prop.GetValue(target));
         }
